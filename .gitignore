@@ -1,5 +1,24 @@
 .DS_Store
 __pycache__/
 *.pyc
+*.pyo
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Tools and test caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Badge runtime state
 badge/.badge_state/**
 badge25/.badge_state/**
+
+# Local secrets or overrides
+*.local.py
+badge/secrets.local.py
+badge25/secrets.local.py

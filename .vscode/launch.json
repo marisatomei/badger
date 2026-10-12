@@ -2,144 +2,118 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Badge App (Current File)",
+            "name": "Validate Badge Apps",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
+            "program": "${workspaceFolder}/tools/badge.py",
+            "args": [
+                "validate"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "presentation": {
+                "hidden": false,
+                "group": "badge",
+                "order": 1
+            }
+        },
+        {
+            "name": "2025 Simulator (Current File)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/badge25/simulator/badge_simulator.py",
             "args": [
                 "${fileDirname}"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/badge25"
             },
             "justMyCode": false,
             "presentation": {
                 "hidden": false,
-                "group": "badge",
+                "group": "simulator",
                 "order": 1
             }
         },
         {
-            "name": "Badge App with Screenshots",
+            "name": "2025 Simulator: menu",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
+            "program": "${workspaceFolder}/badge25/simulator/badge_simulator.py",
             "args": [
-                "${fileDirname}",
-                "--screenshots",
-                "${env:HOME}/Downloads/"
+                "badge25/apps/menu"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/badge25"
             },
             "justMyCode": false,
             "presentation": {
                 "hidden": false,
-                "group": "badge",
+                "group": "simulator",
                 "order": 2
             }
         },
         {
-            "name": "Badge App: menu",
+            "name": "2025 Simulator: flappy",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
+            "program": "${workspaceFolder}/badge25/simulator/badge_simulator.py",
             "args": [
-                "badge/apps/menu"
+                "badge25/apps/flappy"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/badge25"
             },
             "justMyCode": false,
             "presentation": {
                 "hidden": false,
-                "group": "apps",
-                "order": 1
-            }
-        },
-        {
-            "name": "Badge App: badge",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
-            "args": [
-                "badge/apps/badge"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "presentation": {
-                "hidden": false,
-                "group": "apps",
-                "order": 2
-            }
-        },
-        {
-            "name": "Badge App: flappy",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
-            "args": [
-                "badge/apps/flappy"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "presentation": {
-                "hidden": false,
-                "group": "apps",
+                "group": "simulator",
                 "order": 3
             }
         },
         {
-            "name": "Badge App: stocks",
+            "name": "2025 Simulator: stocks",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
+            "program": "${workspaceFolder}/badge25/simulator/badge_simulator.py",
             "args": [
-                "badge/apps/stocks"
+                "badge25/apps/stocks"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/badge25"
             },
             "justMyCode": false,
             "presentation": {
                 "hidden": false,
-                "group": "apps",
+                "group": "simulator",
                 "order": 4
             }
         },
         {
-            "name": "Badge App: weather",
+            "name": "2025 Simulator: weather",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/simulator/badge_simulator.py",
+            "program": "${workspaceFolder}/badge25/simulator/badge_simulator.py",
             "args": [
-                "badge/apps/weather"
+                "badge25/apps/weather"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}/badge25"
             },
             "justMyCode": false,
             "presentation": {
                 "hidden": false,
-                "group": "apps",
+                "group": "simulator",
                 "order": 5
             }
         }

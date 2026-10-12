@@ -14,8 +14,11 @@ people using the previous badge.
 | [`badge/`](./badge/) | Universe 2026 `/system` files and apps |
 | [`badge25/`](./badge25/) | Archived Universe 2025 files, docs, simulator, and apps |
 | [`hardware/`](./hardware/) | Universe 2026 schematic and hardware/GPIO reference |
+| [`tools/`](./tools/) | Developer CLI helper and app validator (`tools/badge.py`) |
 | [`eink/`](./eink/) | Earlier e-ink badge resources |
 | [`ir-beacon/`](./ir-beacon/) | IR beacon utilities and protocol experiments |
+
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for local environment setup, developer commands (`make`), app scaffolding, validation, and USB serial deployment workflows.
 
 The legacy simulator and Badgeware API documentation are under `badge25/`.
 They do not model the 2026 graphics and input APIs.

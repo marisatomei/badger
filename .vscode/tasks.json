@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Validate Badge Apps",
+            "type": "shell",
+            "command": "python3 tools/badge.py validate",
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Scan Connected Badge Devices",
+            "type": "shell",
+            "command": "python3 tools/badge.py devs",
+            "problemMatcher": []
+        },
+        {
+            "label": "Connect to Badge REPL",
+            "type": "shell",
+            "command": "python3 tools/badge.py repl",
+            "problemMatcher": []
+        },
+        {
+            "label": "Reset Badge",
+            "type": "shell",
+            "command": "python3 tools/badge.py reset",
+            "problemMatcher": []
+        }
+    ]
+}
