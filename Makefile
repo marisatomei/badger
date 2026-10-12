@@ -1,4 +1,4 @@
-.PHONY: help venv setup validate test new-app devs repl deploy mount ls reset clean
+.PHONY: help venv setup validate test sim new-app devs repl deploy mount ls reset clean
 
 PYTHON ?= $(shell which python3)
 VENV ?= .venv
@@ -8,7 +8,9 @@ VENV_PIP = $(VENV)/bin/pip
 help:
 	@echo "GitHub Universe 2026 Badge Development Commands:"
 	@echo "  make setup            - Set up local Python virtual environment & dependencies"
+	@echo "  make sim [APP=name]   - Run Universe 2026 Badge Simulator (default: menu)"
 	@echo "  make validate         - Validate all 2026 badge apps, syntax, and guidelines"
+	@echo "  make test             - Run validation suite and tests"
 	@echo "  make new-app APP=name - Scaffold a new 2026 badge app with icon & boilerplate"
 	@echo "  make devs             - Scan for connected badge USB serial ports"
 	@echo "  make repl             - Connect to badge interactive MicroPython REPL"
@@ -29,6 +31,9 @@ setup: venv
 	@$(VENV_PIP) install --upgrade pip
 	@$(VENV_PIP) install -r requirements.txt
 	@echo "\nSetup complete! Activate with: source $(VENV)/bin/activate"
+
+sim:
+	@$(PYTHON) tools/badge.py sim $(if $(APP),$(APP),menu) $(if $(SCALE),--scale $(SCALE),) $(if $(FRAMES),--frames $(FRAMES),)
 
 validate:
 	@$(PYTHON) tools/badge.py validate

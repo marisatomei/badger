@@ -404,9 +404,37 @@ def cmd_deploy(args: argparse.Namespace) -> int:
             return 1
 
 
+def cmd_sim(args: argparse.Namespace) -> int:
+    """Run Universe 2026 badge app in the local simulator."""
+    sim_script = REPO_ROOT / "tools" / "simulator26.py"
+    cmd = [sys.executable, str(sim_script)]
+    if args.app:
+        cmd.append(args.app)
+    if args.scale:
+        cmd.extend(["--scale", str(args.scale)])
+    if args.perf:
+        cmd.append("--perf")
+    if args.clean:
+        cmd.append("--clean")
+    if getattr(args, "frames", None):
+        cmd.extend(["--frames", str(args.frames)])
+    try:
+        return subprocess.run(cmd).returncode
+    except KeyboardInterrupt:
+        return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="GitHub Universe 2026 Badge Developer CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # sim
+    sub_sim = subparsers.add_parser("sim", help="Run 2026 app in the badge simulator")
+    sub_sim.add_argument("app", nargs="?", default="menu", help="App name under badge/apps/ (default: menu)")
+    sub_sim.add_argument("--scale", type=int, default=4, help="Display scale factor (default: 4)")
+    sub_sim.add_argument("--perf", action="store_true", help="Print live performance statistics")
+    sub_sim.add_argument("--clean", action="store_true", help="Clear saved state (.badge_state) before running")
+    sub_sim.add_argument("--frames", type=int, default=None, help="Exit after N frames")
 
     # validate
     sub_val = subparsers.add_parser("validate", help="Validate all badge apps and code guidelines")
@@ -440,6 +468,7 @@ def main() -> int:
     args = parser.parse_args()
 
     handlers = {
+        "sim": cmd_sim,
         "validate": cmd_validate,
         "new-app": cmd_new_app,
         "devs": cmd_devs,

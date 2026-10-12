@@ -18,10 +18,9 @@ people using the previous badge.
 | [`eink/`](./eink/) | Earlier e-ink badge resources |
 | [`ir-beacon/`](./ir-beacon/) | IR beacon utilities and protocol experiments |
 
-See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for local environment setup, developer commands (`make`), app scaffolding, validation, and USB serial deployment workflows.
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for local environment setup, developer commands (`make`), app scaffolding, the Universe 2026 simulator (`make sim`), validation, and USB serial deployment workflows.
 
-The legacy simulator and Badgeware API documentation are under `badge25/`.
-They do not model the 2026 graphics and input APIs.
+The legacy simulator and Badgeware API documentation under `badge25/` are for the previous year's badge and do not model the 2026 graphics and input APIs. Use `make sim` for 2026 apps.
 
 ## Pimoroni and Badgeware resources
 

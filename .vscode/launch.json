@@ -18,6 +18,91 @@
             }
         },
         {
+            "name": "Universe 2026 Simulator: Current App",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/simulator26.py",
+            "args": [
+                "${file}"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "simulator-2026",
+                "order": 1
+            }
+        },
+        {
+            "name": "Universe 2026 Simulator: Menu",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/simulator26.py",
+            "args": [
+                "menu"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "simulator-2026",
+                "order": 2
+            }
+        },
+        {
+            "name": "Universe 2026 Simulator: Flappy",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/simulator26.py",
+            "args": [
+                "flappy"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "simulator-2026",
+                "order": 3
+            }
+        },
+        {
+            "name": "Universe 2026 Simulator: Plucky Cluck",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/simulator26.py",
+            "args": [
+                "plucky_cluck"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "simulator-2026",
+                "order": 4
+            }
+        },
+        {
+            "name": "Universe 2026 Simulator: Clock",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/simulator26.py",
+            "args": [
+                "clock"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "simulator-2026",
+                "order": 5
+            }
+        },
+        {
             "name": "2025 Simulator (Current File)",
             "type": "debugpy",
             "request": "launch",

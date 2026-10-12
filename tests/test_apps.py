@@ -5,6 +5,7 @@ import os
 import py_compile
 import re
 import struct
+import subprocess
 import tempfile
 import sys
 import unittest
@@ -95,6 +96,30 @@ class TestBadgeApps(unittest.TestCase):
         self.assertTrue(png_data.startswith(b"\x89PNG\r\n\x1a\n"))
         w, h = struct.unpack(">II", png_data[16:24])
         self.assertEqual((w, h), (24, 24))
+
+    def test_simulator_headless_smoke_runs(self):
+        """Smoke test 2026 simulator headlessly for key apps."""
+        sim_path = REPO_ROOT / "tools" / "simulator26.py"
+        self.assertTrue(sim_path.exists(), "tools/simulator26.py must exist")
+
+        env = os.environ.copy()
+        env["SDL_VIDEODRIVER"] = "dummy"
+
+        for app_name in ["menu", "flappy", "clock", "input_test"]:
+            with self.subTest(app=app_name):
+                res = subprocess.run(
+                    [sys.executable, str(sim_path), app_name, "--frames", "3"],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(
+                    res.returncode,
+                    0,
+                    f"Simulator crashed on {app_name}:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}",
+                )
+                self.assertNotIn("Crash in", res.stdout)
+                self.assertNotIn("Crash in", res.stderr)
 
 
 if __name__ == "__main__":

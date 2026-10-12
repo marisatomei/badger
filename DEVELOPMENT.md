@@ -62,6 +62,57 @@ badge/apps/my_game/
 
 ---
 
+## Universe 2026 Badge Simulator
+
+The repository includes a standalone Pygame simulator (`tools/simulator26.py`) that replicates the 2026 MicroPython environment on your host machine without needing physical hardware.
+
+### Running the Simulator
+
+```bash
+# Launch the main menu (default):
+make sim
+
+# Launch a specific app:
+make sim APP=flappy
+make sim APP=plucky_cluck
+make sim APP=clock
+
+# Customize window scale (default is 4x):
+make sim APP=flappy SCALE=5
+
+# Clear persistent state before running:
+python3 tools/badge.py sim flappy --clean
+
+# View live performance/framerate statistics:
+python3 tools/badge.py sim flappy --perf
+```
+
+### Controls & Keybindings
+
+| Badge Control / Action | Keyboard Keys | Description |
+| --- | --- | --- |
+| **D-Pad Up** | `Up Arrow` / `W` | Directional Up |
+| **D-Pad Down** | `Down Arrow` / `S` | Directional Down |
+| **D-Pad Left** | `Left Arrow` / `A` | Directional Left |
+| **D-Pad Right** | `Right Arrow` / `D` | Directional Right |
+| **Button SELECT** | `Enter` / `Space` / `Z` | Primary action / confirm / jump |
+| **Button BACK** | `Escape` / `Backspace` / `X` | Return to previous screen / cancel |
+| **Button MENU** | `Tab` / `M` | Open menu / secondary action |
+| **Button HOME** | `H` | Return to main menu launcher |
+| **Rotate / Flip 180°** | `R` | Toggle badge orientation (upside-down mode) |
+| **Screenshot** | `F12` | Save native resolution PNG to `screenshots/` |
+| **Quit Simulator** | Close window / `Ctrl+C` | Exit application |
+
+### What the Simulator Replicates
+- **2026 Globals**: Provides `badge`, `screen`, `image`, `font`, `color`, `shape`, `brush`, `vec2`, `rect`, `mat3`, and `run()`.
+- **Orientation Awareness**: Swapping orientation via `R` flips screen rendering and swaps D-Pad directions (`BUTTON_UP` becomes bottom physical button).
+- **Filesystem Virtualization**: Transparently redirects `/system` to local `badge/` and `/state` to `.badge_state/`.
+- **Dynamic Resolution**: Supports dynamic switching between `LORES` (160x120) and `HIRES` (320x240).
+- **Persistent State**: Simulates `badgeware.State.load()` and `badgeware.State.save()` saving JSON files to `.badge_state/`.
+- **Mock Hardware**: Stubs `badge.battery()`, `badge.is_charging()`, `wifi`, `secrets`, and `requests`.
+
+---
+
 ## Working with Physical Badge Hardware
 
 Connect the badge via USB-C. The badge presents a USB serial CDC device (`2e8a:1101 Pimoroni Tufty 2350 MicroPython`).
