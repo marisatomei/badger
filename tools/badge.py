@@ -407,7 +407,9 @@ def cmd_deploy(args: argparse.Namespace) -> int:
 def cmd_sim(args: argparse.Namespace) -> int:
     """Run Universe 2026 badge app in the local simulator."""
     sim_script = REPO_ROOT / "tools" / "simulator26.py"
-    cmd = [sys.executable, str(sim_script)]
+    venv_py = REPO_ROOT / ".venv" / "bin" / "python3"
+    py_exec = str(venv_py) if venv_py.exists() else sys.executable
+    cmd = [py_exec, str(sim_script)]
     if args.app:
         cmd.append(args.app)
     if args.scale:

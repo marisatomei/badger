@@ -1,9 +1,15 @@
 .PHONY: help venv setup validate test sim new-app devs repl deploy mount ls reset clean
 
-PYTHON ?= $(shell which python3)
 VENV ?= .venv
 VENV_PYTHON = $(VENV)/bin/python3
 VENV_PIP = $(VENV)/bin/pip
+
+# Prefer virtualenv Python when available, unless explicitly overridden
+ifeq ($(wildcard $(VENV_PYTHON)),)
+  PYTHON ?= $(shell which python3)
+else
+  PYTHON ?= $(VENV_PYTHON)
+endif
 
 help:
 	@echo "GitHub Universe 2026 Badge Development Commands:"

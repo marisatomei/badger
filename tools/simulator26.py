@@ -20,18 +20,22 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Callable
 
-try:
-    import pygame
-except ImportError:
-    raise SystemExit(
-        "Pygame is required to run the Universe 2026 Badge Simulator.\n"
-        "Install with: pip install pygame-ce  (or pip install pygame)"
-    )
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BADGE_ROOT = REPO_ROOT / "badge"
 APPS_DIR = BADGE_ROOT / "apps"
 STATE_DIR = REPO_ROOT / ".badge_state"
+
+try:
+    import pygame
+except ImportError:
+    # Auto-detect local virtual environment if active shell didn't activate it
+    _venv_py = REPO_ROOT / ".venv" / "bin" / "python3"
+    if _venv_py.exists() and Path(sys.executable).resolve() != _venv_py.resolve():
+        os.execv(str(_venv_py), [str(_venv_py)] + sys.argv)
+    raise SystemExit(
+        "Pygame is required to run the Universe 2026 Badge Simulator.\n"
+        "Run 'make setup' to set up the environment, or run: pip install pygame-ce"
+    )
 
 # -----------------------------------------------------------------------------
 # Path Virtualization (/system -> badge)
