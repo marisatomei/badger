@@ -63,10 +63,33 @@ def map_system_path(p: str | Path) -> str:
     return s
 
 
-# Intercept os.chdir, os.listdir, and open
+# Intercept os.chdir, os.listdir, os.rename, os.remove, and open
 _real_chdir = os.chdir
 _real_listdir = os.listdir
+_real_rename = os.rename
+_real_remove = os.remove
 _real_open = builtins.open
+
+
+def _safe_rename(src: Any, dst: Any) -> None:
+    s = map_system_path(src)
+    d = map_system_path(dst)
+    parent = Path(d).parent
+    parent.mkdir(parents=True, exist_ok=True)
+    if hasattr(os, "replace"):
+        os.replace(s, d)
+    else:
+        try:
+            os.remove(d)
+        except OSError:
+            pass
+        _real_rename(s, d)
+
+
+def _safe_remove(path: Any) -> None:
+    resolved = map_system_path(path)
+    if os.path.exists(resolved):
+        _real_remove(resolved)
 
 
 def _safe_chdir(path: str | Path) -> None:
@@ -201,6 +224,8 @@ def _safe_import(name: str, globals: Any = None, locals: Any = None, fromlist: A
 os.chdir = _safe_chdir  # type: ignore
 os.listdir = _safe_listdir  # type: ignore
 os.ilistdir = _safe_ilistdir  # type: ignore
+os.rename = _safe_rename  # type: ignore
+os.remove = _safe_remove  # type: ignore
 builtins.open = _safe_open  # type: ignore
 builtins.__import__ = _safe_import  # type: ignore
 
@@ -539,6 +564,15 @@ class Image:
         self.transform: mat3 | None = None
 
     @staticmethod
+    def qr(url: str, ecc: int = 1, scale: int = 2) -> Image:
+        surf = pygame.Surface((64, 64), pygame.SRCALPHA)
+        surf.fill((255, 255, 255, 255))
+        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(4, 4, 16, 16), width=2)
+        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(44, 4, 16, 16), width=2)
+        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(4, 44, 16, 16), width=2)
+        return Image(surf)
+
+    @staticmethod
     def load(path: str | Path) -> Image:
         resolved = map_system_path(path)
         if not os.path.isabs(resolved) and not os.path.exists(resolved):
@@ -552,7 +586,11 @@ class Image:
             surf.fill((60, 120, 220, 255))
             return Image(surf)
 
-        surf = pygame.image.load(resolved).convert_alpha()
+        try:
+            surf = pygame.image.load(resolved).convert_alpha()
+        except Exception:
+            surf = pygame.Surface((80, 80), pygame.SRCALPHA)
+            surf.fill((88, 58, 247, 255))
         return Image(surf)
 
     def spritesheet(self, columns: int, rows: int) -> SpriteSheet:
@@ -779,10 +817,18 @@ class Screen:
         else:
             return
 
-        rendered = self.font.render(str(msg), c)
+        size = kwargs.get("font_size") or (int(round(args[2])) if len(args) >= 3 and isinstance(args[2], (int, float)) else None)
+        if size:
+            f = pygame.font.Font(None, int(round(size)))
+            rendered = f.render(str(msg), True, c)
+        else:
+            rendered = self.font.render(str(msg), c)
         self._surface.blit(rendered, (x, y))
 
-    def measure_text(self, text: str) -> tuple[int, int]:
+    def measure_text(self, text: str, font_size: int | None = None, *args, **kwargs) -> tuple[int, int]:
+        if font_size:
+            f = pygame.font.Font(None, int(round(font_size)))
+            return f.size(str(text))
         return self.font.measure_text(str(text))
 
 
@@ -1012,7 +1058,7 @@ def install_mock_modules() -> None:
     m_badgeware.PixelFont = SimpleNamespace(load=lambda path: FontWrapper("pixel", 12))
     m_badgeware.run = lambda update_fn: None
 
-    # badgeware.ir
+    # badgeware.ir & link
     m_badgeware_ir = ModuleType("badgeware.ir")
     class IRMock:
         def bind(self, descriptor):
@@ -1022,7 +1068,137 @@ def install_mock_modules() -> None:
     m_badgeware_ir.ir = IRMock()
     m_badgeware.ir = m_badgeware_ir
     sys.modules["badgeware.ir"] = m_badgeware_ir
+
+    class MockLink:
+        def __init__(self, game):
+            self.id = b"\x12\x34\x56\x78\x9a\xbc\xde\xf0"
+            self.name = "My Badge"
+            self.partner = None
+            self.linked = False
+        def leave(self):
+            pass
+        def pump(self):
+            pass
+        def update(self):
+            pass
+        def receive(self):
+            return []
+        def send(self, data):
+            pass
+
+    class MockProximity:
+        def __init__(self, link):
+            pass
+        def rest(self, *args):
+            pass
+        def clear(self):
+            pass
+        def lights(self, now):
+            return None
+        def update(self, now):
+            pass
+        def syncing(self):
+            return None
+        def cooling(self, now):
+            return None
+        def progress(self, now):
+            return 0.0
+
+    class MockBadgeLink:
+        ID_LEN = 8
+        Link = MockLink
+        Proximity = MockProximity
+        def draw_identicon(self, scr, badge_id, x, y, size):
+            c = normalize_color(color.rgb(88, 58, 247))
+            pygame.draw.rect(scr._surface, c, pygame.Rect(x, y, size, size), border_radius=4)
+    m_badgeware.link = MockBadgeLink()
     sys.modules["badgeware"] = m_badgeware
+
+    # fetch
+    m_fetch = ModuleType("fetch")
+    class MockRequest:
+        def __init__(self, url, file):
+            self.url = url
+            self.file = file
+            self.state = "Done"
+            self.error = None
+        def __bool__(self):
+            return True
+    class MockFetchUrl:
+        def __init__(self, url, headers=None):
+            self.url = url
+            self.headers = headers
+        def to(self, dest):
+            resolved_dest = Path(map_system_path(dest))
+            resolved_dest.parent.mkdir(parents=True, exist_ok=True)
+            if "badge_user.json" in str(dest):
+                handle_name = getattr(m_sec, "GITHUB_USERNAME", "mgliot") or "mgliot"
+                contact_name = getattr(m_sec, "CONTACT_NAME", "Marcelino Gonzalez") or "Marcelino Gonzalez"
+                resolved_dest.write_text(json.dumps({
+                    "login": handle_name,
+                    "name": contact_name,
+                    "followers": 18,
+                    "public_repos": 12
+                }), encoding="utf-8")
+            elif "badge_contribs.json" in str(dest):
+                weeks = []
+                for w in range(52):
+                    days = [{"level": (w + d) % 4} for d in range(7)]
+                    weeks.append({"contribution_days": days})
+                resolved_dest.write_text(json.dumps({
+                    "total_contributions": 342,
+                    "weeks": weeks
+                }), encoding="utf-8")
+            elif "badge_avatar.png" in str(dest):
+                surf = pygame.Surface((80, 80), pygame.SRCALPHA)
+                surf.fill((88, 58, 247, 255))
+                pygame.image.save(surf, str(resolved_dest))
+            else:
+                resolved_dest.touch()
+            return MockRequest(self.url, dest)
+    class AsyncFetch:
+        MAX_HEADER_BYTES = 8192
+    m_fetch.AsyncFetch = AsyncFetch
+    m_fetch.url = lambda u, headers=None: MockFetchUrl(u, headers)
+    sys.modules["fetch"] = m_fetch
+
+    # pairing
+    m_pairing = ModuleType("pairing")
+    class Pairing:
+        def __init__(self, x=0, y=0, unit=1):
+            pass
+        def draw_together(self, now):
+            pass
+        def draw_apart(self):
+            pass
+        def draw_loop(self, now):
+            pass
+    m_pairing.Pairing = Pairing
+    sys.modules["pairing"] = m_pairing
+
+    # hints
+    m_hints = ModuleType("hints")
+    class HintStyle:
+        def __init__(self, fg, dim, bg):
+            pass
+    m_hints.Style = HintStyle
+    m_hints.hint_width = lambda *args: 20
+    m_hints.draw_hint = lambda *args: None
+    m_hints.flipped = lambda: False
+    sys.modules["hints"] = m_hints
+
+    # missing_details
+    m_md = ModuleType("missing_details")
+    m_md.mona_sans = lambda: FontWrapper("mona_sans", 16)
+    m_md.missing = lambda key: []
+    def _md_show(missing, draw_graph, message_tuple):
+        if draw_graph:
+            draw_graph()
+        screen.pen = color.rgb(255, 255, 255)
+        for i, line in enumerate(message_tuple):
+            screen.text(line, 20, 40 + i * 20)
+    m_md.show = _md_show
+    sys.modules["missing_details"] = m_md
 
     # machine
     m_machine = ModuleType("machine")
@@ -1063,6 +1239,7 @@ def install_mock_modules() -> None:
     m_machine.DEEPSLEEP_RESET = 4
     m_machine.SOFT_RESET = 5
     m_machine.reset_cause = lambda: 1
+    m_machine.unique_id = lambda: b"\x12\x34\x56\x78\x9a\xbc\xde\xf0"
     sys.modules["machine"] = m_machine
 
     # brand
@@ -1092,6 +1269,7 @@ def install_mock_modules() -> None:
     m_wifi.is_connected = lambda: True
     m_wifi.connect = lambda *args, **kwargs: True
     m_wifi.disconnect = lambda: True
+    m_wifi.failure = lambda: False
     sys.modules["wifi"] = m_wifi
 
     m_ntp = ModuleType("ntptime")
@@ -1118,6 +1296,12 @@ def install_mock_modules() -> None:
     if sec_path.exists():
         try:
             exec(sec_path.read_text(encoding="utf-8"), m_sec.__dict__)
+        except Exception:
+            pass
+    sec_local = BADGE_ROOT / "secrets.local.py"
+    if sec_local.exists():
+        try:
+            exec(sec_local.read_text(encoding="utf-8"), m_sec.__dict__)
         except Exception:
             pass
     m_sec.require = lambda *args: True
@@ -1187,12 +1371,13 @@ class RunResult:
 
 
 class SimulatorApp:
-    def __init__(self, scale: int = 4, screenshots_dir: Path | None = None, perf: bool = False, max_frames: int | None = None):
+    def __init__(self, scale: int = 4, screenshots_dir: Path | None = None, perf: bool = False, max_frames: int | None = None, save_screenshot: Path | None = None):
         self.scale = scale
         self.screenshots_dir = screenshots_dir or (REPO_ROOT / "screenshots")
         self.perf = perf
         self.max_frames = max_frames
         self.frame_count = 0
+        self.save_screenshot = save_screenshot
 
         pygame.init()
         pygame.display.set_caption("GitHub Universe 2026 Badge Simulator")
@@ -1343,6 +1528,11 @@ class SimulatorApp:
                     self.running = False
                     break
 
+        if self.save_screenshot:
+            self.save_screenshot.parent.mkdir(parents=True, exist_ok=True)
+            pygame.image.save(self.screen_obj._surface, str(self.save_screenshot))
+            print(f"[Screenshot] Saved frame to {self.save_screenshot}")
+
         return RunResult(result)
 
     def launch(self, app_path: str) -> Any:
@@ -1404,6 +1594,7 @@ def main() -> int:
     parser.add_argument("--perf", action="store_true", help="Print live performance statistics")
     parser.add_argument("--clean", action="store_true", help="Remove saved state before running")
     parser.add_argument("--frames", type=int, default=None, help="Exit after N frames (useful for headless testing)")
+    parser.add_argument("--save-screenshot", help="Save final frame image to this path on exit")
 
     args = parser.parse_args()
 
@@ -1425,6 +1616,7 @@ def main() -> int:
         screenshots_dir=Path(args.screenshots) if args.screenshots else None,
         perf=args.perf,
         max_frames=args.frames,
+        save_screenshot=Path(args.save_screenshot) if args.save_screenshot else None,
     )
 
     sim.launch(app_path)
