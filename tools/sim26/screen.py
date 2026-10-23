@@ -53,6 +53,9 @@ class _FontNamespace:
         self.hungry = FontWrapper("hungry", 14)
         self.ignore = FontWrapper("ignore", 16)
 
+    def load(self, name: str, size: int = 16) -> FontWrapper:
+        return getattr(self, str(name), FontWrapper(str(name), size))
+
     def __getattr__(self, item: str) -> FontWrapper:
         # Fallback for any requested font name
         fw = FontWrapper(item, 16)
@@ -475,10 +478,11 @@ class Image:
 
     def text(self, msg: Any, *args, **kwargs) -> None:
         c = normalize_color(self.pen)
+        advance_cursor = False
         if not args:
-            return
-
-        if len(args) == 1 and isinstance(args[0], (vec2, tuple, list)):
+            x, y = int(round(self.cursor.x)), int(round(self.cursor.y))
+            advance_cursor = True
+        elif len(args) == 1 and isinstance(args[0], (vec2, tuple, list)):
             x, y = int(round(args[0][0])), int(round(args[0][1]))
         elif len(args) == 1 and isinstance(args[0], rect):
             x, y = int(round(args[0].x)), int(round(args[0].y))
@@ -518,6 +522,8 @@ class Image:
         if self.alpha < 255:
             rendered.set_alpha(self.alpha)
         self._surface.blit(rendered, (x, y))
+        if advance_cursor:
+            self.cursor = vec2(self.cursor.x, self.cursor.y + font_obj.get_linesize())
 
     def measure_text(self, text: str, font_size: int | None = None, *args, **kwargs) -> tuple[int, int]:
         if font_size:
