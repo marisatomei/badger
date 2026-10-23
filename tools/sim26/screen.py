@@ -214,11 +214,27 @@ _ICON_GLYPHS: dict[tuple[str, str], tuple[str, ...]] = {
 }
 
 
+_FONT_CACHE: dict[int, pygame.font.Font] = {}
+
+
+def _load_sys_font(size: int) -> pygame.font.Font:
+    # Pygame's Font(None, n) uses a high-DPI point size where 16pt renders ~11px tall,
+    # whereas SysFont uses pixel-closer point sizes where 16pt renders ~22px tall.
+    # Scale by 0.68 so text layout matches hardware/Font(None) metrics while fixing "tt" kerning.
+    pt = max(8, int(round(size * 0.68)))
+    if pt not in _FONT_CACHE:
+        try:
+            _FONT_CACHE[pt] = pygame.font.SysFont("segoeui,arial,helvetica,dejavusans,sans-serif", pt)
+        except Exception:
+            _FONT_CACHE[pt] = pygame.font.Font(None, size)
+    return _FONT_CACHE[pt]
+
+
 class FontWrapper:
     def __init__(self, name: str, size: int):
         self.name = str(name)
         self.size = size
-        self._font = pygame.font.Font(None, size)
+        self._font = _load_sys_font(size)
 
     @property
     def _base_family(self) -> str:
@@ -383,11 +399,57 @@ class Image:
 
     @staticmethod
     def qr(url: str, ecc: int = 1, scale: int = 2) -> Image:
-        surf = pygame.Surface((64, 64), pygame.SRCALPHA)
+        n = 25
+        pad = 2
+        total = n + pad * 2
+        px = max(1, int(scale))
+        surf = pygame.Surface((total * px, total * px), pygame.SRCALPHA)
         surf.fill((255, 255, 255, 255))
-        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(4, 4, 16, 16), width=2)
-        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(44, 4, 16, 16), width=2)
-        pygame.draw.rect(surf, (0, 0, 0, 255), pygame.Rect(4, 44, 16, 16), width=2)
+
+        grid = [[False] * n for _ in range(n)]
+        reserved = [[False] * n for _ in range(n)]
+
+        def place_finder(ox: int, oy: int) -> None:
+            for r in range(-1, 8):
+                for c in range(-1, 8):
+                    rx, ry = ox + c, oy + r
+                    if 0 <= rx < n and 0 <= ry < n:
+                        reserved[ry][rx] = True
+                        if 0 <= r <= 6 and 0 <= c <= 6:
+                            grid[ry][rx] = (r in (0, 6) or c in (0, 6) or (2 <= r <= 4 and 2 <= c <= 4))
+
+        place_finder(0, 0)
+        place_finder(n - 7, 0)
+        place_finder(0, n - 7)
+
+        # Alignment pattern at (16, 16) for version 2 (25x25)
+        for r in range(16, 21):
+            for c in range(16, 21):
+                reserved[r][c] = True
+                grid[r][c] = (r in (16, 20) or c in (16, 20) or (r == 18 and c == 18))
+
+        # Timing patterns
+        for i in range(8, n - 8):
+            reserved[6][i] = reserved[i][6] = True
+            grid[6][i] = grid[i][6] = (i % 2 == 0)
+
+        # Deterministic data modules from URL
+        payload = url.encode("utf-8") or b"https://badge"
+        bit_idx = 0
+        for r in range(n):
+            for c in range(n):
+                if not reserved[r][c]:
+                    b_val = payload[(bit_idx // 8) % len(payload)]
+                    shift = 7 - (bit_idx % 8)
+                    mask = ((r * 31 + c * 17 + bit_idx) & 1)
+                    grid[r][c] = bool(((b_val >> shift) & 1) ^ mask)
+                    bit_idx += 1
+
+        black = (0, 0, 0, 255)
+        for r in range(n):
+            for c in range(n):
+                if grid[r][c]:
+                    pygame.draw.rect(surf, black, pygame.Rect((c + pad) * px, (r + pad) * px, px, px))
         return Image(surf)
 
     @staticmethod
@@ -730,19 +792,23 @@ class Image:
         if not args:
             x, y = int(round(self.cursor.x)), int(round(self.cursor.y))
             advance_cursor = True
-        elif len(args) == 1 and isinstance(args[0], (vec2, tuple, list)):
-            x, y = int(round(args[0][0])), int(round(args[0][1]))
-        elif len(args) == 1 and isinstance(args[0], rect):
+        elif isinstance(args[0], rect):
             x, y = int(round(args[0].x)), int(round(args[0].y))
+        elif isinstance(args[0], (vec2, tuple, list)):
+            x, y = int(round(args[0][0])), int(round(args[0][1]))
         elif len(args) >= 2:
             x, y = int(round(args[0])), int(round(args[1]))
         else:
             return
 
-        size = kwargs.get("font_size") or (
-            int(round(args[2])) if len(args) >= 3 and isinstance(args[2], (int, float)) else None
-        )
-        font_obj = pygame.font.Font(None, int(round(size))) if size else self.font._font
+        size = kwargs.get("font_size")
+        if size is None:
+            if isinstance(args[0], (rect, vec2, tuple, list)):
+                if len(args) >= 2 and isinstance(args[1], (int, float)):
+                    size = int(round(args[1]))
+            elif len(args) >= 3 and isinstance(args[2], (int, float)):
+                size = int(round(args[2]))
+        font_obj = _load_sys_font(int(round(size))) if size else self.font._font
 
         if len(args) >= 1 and isinstance(args[0], rect) and args[0].w > 0:
             max_w = int(round(args[0].w))
@@ -775,7 +841,7 @@ class Image:
 
     def measure_text(self, text: str, font_size: int | None = None, *args, **kwargs) -> tuple[int, int]:
         if font_size:
-            f = pygame.font.Font(None, int(round(font_size)))
+            f = _load_sys_font(int(round(font_size)))
             return f.size(str(text))
         return self.font.measure_text(str(text))
 

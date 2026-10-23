@@ -7,9 +7,55 @@ import ui
 from gallery import GALLERY, crop, load_photo, tile_path
 from icons import ICONS
 
+def draw_am_tile_icon(cx, cy, scale, selected, selected_at):
+    elapsed = (badge.ticks - selected_at) / 1000.0 if selected else 0.0
+    pop = 1.0 + 0.14 * math.sin(elapsed * 8.0) * math.exp(-elapsed * 2.2) if selected else 1.0
+    s = scale * pop
+    t = badge.ticks / 1000.0 if selected else 0.0
+
+    pts_outer = []
+    pts_inner = []
+    steps = 16
+    for i in range(steps + 1):
+        u = i / steps
+        angle = math.pi * (0.88 - u * 0.98)
+        wave = (math.sin(t * 4.5 + u * 4.5) * 1.6 * s) if selected else 0.0
+        rx_out = (22.0 + u * 5.0) * s
+        ry_out = (14.0 - u * 2.0) * s
+        rx_in = (15.5 + u * 3.5) * s
+        ry_in = (9.0 - u * 1.2) * s
+
+        ox = cx + math.cos(angle) * rx_out - (u - 0.5) * 6.5 * s
+        oy = cy + 2 * s - math.sin(angle) * ry_out + wave
+        ix = cx + math.cos(angle) * rx_in - (u - 0.5) * 4.0 * s
+        iy = cy + 2 * s - math.sin(angle) * (ry_in - 2.0 * s) + wave * 0.7
+        pts_outer.append(vec2(ox, oy))
+        pts_inner.append(vec2(ix, iy))
+
+    pulse = int((math.sin(t * 5.0) * 0.5 + 0.5) * 50) if selected else 15
+    screen.pen = color.rgb(255, 50 + pulse, 5)
+    screen.shape(shape.custom(pts_outer + list(reversed(pts_inner))))
+
+    tail_wave = (math.sin(t * 4.5) * 1.4 * s) if selected else 0.0
+    tail_pts = [
+        vec2(cx - 20 * s, cy + 4 * s),
+        vec2(cx - 3 * s, cy + 8 * s + tail_wave),
+        vec2(cx + 19 * s, cy + 5 * s),
+        vec2(cx + 3 * s, cy + 12 * s + tail_wave),
+    ]
+    screen.pen = color.rgb(215, 32, 10)
+    screen.shape(shape.custom(tail_pts))
+
+    if selected:
+        spark_idx = min(steps, int(((t * 0.65) % 1.0) * steps))
+        sx, sy = pts_outer[spark_idx]
+        screen.pen = color.rgb(255, 220, 130, 220)
+        screen.circle(sx, sy + 1.5 * s, max(1, int(2.2 * s)))
+
 TILES_PER_ROW = 4
 
 APP_ORDER = (
+    "arcelormittal",
     "badge",
     "contacts",
     "mona_paint",
@@ -189,7 +235,7 @@ class App(Tile):
         self.slug = slug
         self.path = path
         self.animated = animated
-        self.rgb = ui.PALETTE[ordinal % len(ui.PALETTE)]
+        self.rgb = (42, 46, 54) if slug == "arcelormittal" else ui.PALETTE[ordinal % len(ui.PALETTE)]
         self.base = ui.shade(self.rgb, BASE_STRENGTH)
         self.tones = {
             "base": self.base,
@@ -253,6 +299,19 @@ class App(Tile):
                 screen.pen = self.tones[tone]
                 screen.shape(element)
             screen.antialias = antialias
+
+        if self.slug == "arcelormittal":
+            if selected and not self.was_selected:
+                self.selected_at = badge.ticks
+            self.was_selected = selected
+            draw_am_tile_icon(
+                centre_x + tilt.x * ICON_SHIFT,
+                centre_y + tilt.y * ICON_SHIFT,
+                scale * DESIGN_SCALE,
+                selected,
+                self.selected_at,
+            )
+            return
 
         if self.picture is not None:
             icon_size = ICON_SIZE * scale
