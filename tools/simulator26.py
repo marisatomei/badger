@@ -444,6 +444,16 @@ def normalize_color(c: Any) -> pygame.Color:
     return pygame.Color(255, 255, 255, 255)
 
 
+class ImageBrush:
+    def __init__(self, src: Any, transform: mat3 | None = None, filter_mode: Any = None):
+        self.src = src
+        self.transform = transform
+        self.filter_mode = filter_mode
+
+    def geometry(self, *args, **kwargs) -> Any:
+        return self
+
+
 class _BrushNamespace:
     RADIAL = 1
     LINEAR = 2
@@ -454,6 +464,34 @@ class _BrushNamespace:
 
     @staticmethod
     def pattern(*args, **kwargs) -> Any:
+        return ColorObj(200, 200, 200, 255)
+
+    @staticmethod
+    def image(src: Any, transform: mat3 | None = None, filter_mode: Any = None) -> ImageBrush:
+        return ImageBrush(src, transform, filter_mode)
+
+    @staticmethod
+    def blur(radius: float = 1.0) -> Any:
+        return ColorObj(200, 200, 200, 200)
+
+    @staticmethod
+    def erase(tint: Any = None) -> Any:
+        return ColorObj(0, 0, 0, 0)
+
+    @staticmethod
+    def lighten(amount: float = 1.0) -> Any:
+        return ColorObj(255, 255, 255, 100)
+
+    @staticmethod
+    def darken(amount: float = 1.0) -> Any:
+        return ColorObj(0, 0, 0, 100)
+
+    @staticmethod
+    def duotone(c1: Any, c2: Any) -> Any:
+        return ColorObj(150, 255, 170, 255)
+
+    @staticmethod
+    def pixelate(size: float = 1.0) -> Any:
         return ColorObj(200, 200, 200, 255)
 
 
@@ -740,6 +778,32 @@ class Screen:
         )
 
     def shape(self, sh: ShapeObj) -> None:
+        if isinstance(self.pen, ImageBrush) and getattr(self.pen, "src", None):
+            src_surf = getattr(self.pen.src, "_surface", None)
+            if src_surf:
+                trans = sh.transform or self.pen.transform
+                kw = sh.kwargs
+                w = kw.get("w", src_surf.get_width())
+                h = kw.get("h", src_surf.get_height())
+                if trans:
+                    xc, yc = trans.transform_point(w / 2.0, h / 2.0)
+                    sx = math.hypot(trans.m[0], trans.m[3])
+                    sy = math.hypot(trans.m[1], trans.m[4])
+                    theta = math.atan2(trans.m[3], trans.m[0])
+                    nw = max(1, int(round(src_surf.get_width() * sx)))
+                    nh = max(1, int(round(src_surf.get_height() * sy)))
+                    scaled = pygame.transform.scale(src_surf, (nw, nh))
+                    deg = math.degrees(theta)
+                    rotated = pygame.transform.rotate(scaled, -deg)
+                    dst_rect = rotated.get_rect(center=(int(round(xc)), int(round(yc))))
+                    self._surface.blit(rotated, dst_rect)
+                    return
+                else:
+                    x = kw.get("x", 0)
+                    y = kw.get("y", 0)
+                    self._surface.blit(src_surf, (int(round(x)), int(round(y))))
+                    return
+
         c = normalize_color(self.pen)
         kw = sh.kwargs
         kind = sh.kind
@@ -784,15 +848,42 @@ class Screen:
                 elif len(pts) == 2:
                     pygame.draw.line(self._surface, c, pts[0], pts[1], width=max(1, sw))
 
-    def blit(self, src: Image, dest: Any, src_rect: Any = None) -> None:
+    def blit(self, src: Image, *args, **kwargs) -> None:
         if not isinstance(src, Image):
             return
 
         surf = src._surface
+        if not args:
+            return
+
+        # 1. Positional x, y: screen.blit(img, x, y)
+        if len(args) >= 2 and isinstance(args[0], (int, float)) and isinstance(args[1], (int, float)):
+            self._surface.blit(surf, (int(round(args[0])), int(round(args[1]))))
+            return
+
+        # 2. Source rect + Destination rect: screen.blit(img, src_rect, dest_rect, [filter])
+        if len(args) >= 2 and hasattr(args[0], "__len__") and len(args[0]) >= 4 and hasattr(args[1], "__len__") and len(args[1]) >= 4:
+            src_rect = args[0]
+            dest_rect = args[1]
+            sx, sy, sw, sh = int(round(src_rect[0])), int(round(src_rect[1])), int(round(src_rect[2])), int(round(src_rect[3]))
+            sub_rect = pygame.Rect(sx, sy, max(1, sw), max(1, sh)).clip(surf.get_rect())
+            cropped = surf.subsurface(sub_rect) if sub_rect.width > 0 and sub_rect.height > 0 else surf
+            dx, dy, dw, dh = dest_rect[0], dest_rect[1], dest_rect[2], dest_rect[3]
+            nw = max(1, int(round(abs(dw))))
+            nh = max(1, int(round(abs(dh))))
+            scaled = pygame.transform.scale(cropped, (nw, nh))
+            if dw < 0:
+                scaled = pygame.transform.flip(scaled, True, False)
+            if dh < 0:
+                scaled = pygame.transform.flip(scaled, False, True)
+            self._surface.blit(scaled, (int(round(dx)), int(round(dy))))
+            return
+
+        # 3. Destination vec2 or rect: screen.blit(img, dest, [filter])
+        dest = args[0]
         if isinstance(dest, (vec2, tuple, list)) and len(dest) == 2:
             self._surface.blit(surf, (int(round(dest[0])), int(round(dest[1]))))
-
-        elif isinstance(dest, (rect, tuple, list)) and len(dest) >= 4:
+        elif hasattr(dest, "__len__") and len(dest) >= 4:
             dx, dy, dw, dh = dest[0], dest[1], dest[2], dest[3]
             nw = max(1, int(round(abs(dw))))
             nh = max(1, int(round(abs(dh))))
@@ -881,6 +972,44 @@ KEY_MAP = {
 }
 
 
+class ButtonGroup:
+    def __init__(self, runtime: "BadgeRuntime", allowed: set[str] | None = None):
+        self._runtime = runtime
+        self._allowed = allowed
+
+    def pressed(self, action: str | None = None) -> bool | set[str]:
+        if action is not None:
+            return self._runtime.pressed(action)
+        p = self._runtime.pressed()
+        if isinstance(p, set):
+            return (p & self._allowed) if self._allowed is not None else set(p)
+        return bool(p)
+
+    def held(self, action: str | None = None) -> bool | set[str]:
+        if action is not None:
+            return self._runtime.held(action)
+        h = self._runtime.held()
+        if isinstance(h, set):
+            return (h & self._allowed) if self._allowed is not None else set(h)
+        return bool(h)
+
+    def released(self, action: str | None = None) -> bool | set[str]:
+        if action is not None:
+            return self._runtime.released(action)
+        r = self._runtime.released()
+        if isinstance(r, set):
+            return (r & self._allowed) if self._allowed is not None else set(r)
+        return bool(r)
+
+    def touched(self, action: str | None = None) -> bool | set[str]:
+        if action is not None:
+            return self._runtime.touched(action)
+        t = self._runtime.touched()
+        if isinstance(t, set):
+            return (t & self._allowed) if self._allowed is not None else set(t)
+        return bool(t)
+
+
 class BadgeRuntime:
     def __init__(self, screen_ref: Screen):
         global _active_badge_runtime
@@ -895,6 +1024,12 @@ class BadgeRuntime:
         self._pressed_this_frame: set[str] = set()
         self._released_this_frame: set[str] = set()
         self._touched_keys: set[str] = set()
+
+        PAD_BUTTONS = {BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT}
+        FACE_BUTTONS = {BUTTON_SELECT, BUTTON_BACK, BUTTON_HOME, BUTTON_MENU}
+        self.pad = ButtonGroup(self, PAD_BUTTONS)
+        self.buttons = ButtonGroup(self, FACE_BUTTONS)
+        self.all = ButtonGroup(self, None)
 
     def is_charging(self) -> bool:
         return False
@@ -1109,8 +1244,29 @@ def install_mock_modules() -> None:
         Link = MockLink
         Proximity = MockProximity
         def draw_identicon(self, scr, badge_id, x, y, size):
-            c = normalize_color(color.rgb(88, 58, 247))
-            pygame.draw.rect(scr._surface, c, pygame.Rect(x, y, size, size), border_radius=4)
+            raw = list(badge_id) if isinstance(badge_id, (bytes, bytearray)) else [ord(ch) for ch in str(badge_id)]
+            while len(raw) < 8:
+                raw.append(0)
+            bg = ((raw[0] * 37) % 50 + 15, (raw[1] * 41) % 50 + 15, (raw[2] * 43) % 50 + 25)
+            fg = ((raw[3] * 53) % 160 + 90, (raw[4] * 59) % 160 + 90, (raw[5] * 61) % 160 + 90)
+            pygame.draw.rect(scr._surface, bg, pygame.Rect(x, y, size, size), border_radius=4)
+            cell = size / 5.0
+            bits = (raw[0] << 8) | raw[1]
+            for row in range(5):
+                for col in range(3):
+                    bit_index = row * 3 + col
+                    if (bits >> bit_index) & 1:
+                        for c in (col, 4 - col):
+                            rect_cell = pygame.Rect(int(x + c * cell), int(y + row * cell), int(cell) + 1, int(cell) + 1)
+                            pygame.draw.rect(scr._surface, fg, rect_cell)
+
+        def identicon(self, badge_id):
+            raw = list(badge_id) if isinstance(badge_id, (bytes, bytearray)) else [ord(ch) for ch in str(badge_id)]
+            while len(raw) < 8:
+                raw.append(0)
+            bg = color.rgb((raw[0] * 37) % 50 + 15, (raw[1] * 41) % 50 + 15, (raw[2] * 43) % 50 + 25)
+            fg = color.rgb((raw[3] * 53) % 160 + 90, (raw[4] * 59) % 160 + 90, (raw[5] * 61) % 160 + 90)
+            return (bg, fg, bg)
     m_badgeware.link = MockBadgeLink()
     sys.modules["badgeware"] = m_badgeware
 
@@ -1131,30 +1287,41 @@ def install_mock_modules() -> None:
         def to(self, dest):
             resolved_dest = Path(map_system_path(dest))
             resolved_dest.parent.mkdir(parents=True, exist_ok=True)
-            if "badge_user.json" in str(dest):
-                handle_name = getattr(m_sec, "GITHUB_USERNAME", "mgliot") or "mgliot"
-                contact_name = getattr(m_sec, "CONTACT_NAME", "Marcelino Gonzalez") or "Marcelino Gonzalez"
-                resolved_dest.write_text(json.dumps({
-                    "login": handle_name,
-                    "name": contact_name,
-                    "followers": 18,
-                    "public_repos": 12
-                }), encoding="utf-8")
-            elif "badge_contribs.json" in str(dest):
-                weeks = []
-                for w in range(52):
-                    days = [{"level": (w + d) % 4} for d in range(7)]
-                    weeks.append({"contribution_days": days})
-                resolved_dest.write_text(json.dumps({
-                    "total_contributions": 342,
-                    "weeks": weeks
-                }), encoding="utf-8")
-            elif "badge_avatar.png" in str(dest):
-                surf = pygame.Surface((80, 80), pygame.SRCALPHA)
-                surf.fill((88, 58, 247, 255))
-                pygame.image.save(surf, str(resolved_dest))
-            else:
-                resolved_dest.touch()
+            fetched = False
+            try:
+                import urllib.request
+                req = urllib.request.Request(self.url, headers=self.headers or {"User-Agent": "GitHub Universe Badge 2026"})
+                with urllib.request.urlopen(req, timeout=3.0) as resp:
+                    if resp.status == 200:
+                        resolved_dest.write_bytes(resp.read())
+                        fetched = True
+            except Exception:
+                fetched = False
+            if not fetched and not resolved_dest.exists():
+                if "badge_user.json" in str(dest):
+                    handle_name = getattr(m_sec, "GITHUB_USERNAME", "mgliot") or "mgliot"
+                    contact_name = getattr(m_sec, "CONTACT_NAME", "Marcelino Gonzalez") or "Marcelino Gonzalez"
+                    resolved_dest.write_text(json.dumps({
+                        "login": handle_name,
+                        "name": contact_name,
+                        "followers": 18,
+                        "public_repos": 12
+                    }), encoding="utf-8")
+                elif "badge_contribs.json" in str(dest):
+                    weeks = []
+                    for w in range(52):
+                        days = [{"level": (w + d) % 4} for d in range(7)]
+                        weeks.append({"contribution_days": days})
+                    resolved_dest.write_text(json.dumps({
+                        "total_contributions": 342,
+                        "weeks": weeks
+                    }), encoding="utf-8")
+                elif "badge_avatar.png" in str(dest):
+                    surf = pygame.Surface((80, 80), pygame.SRCALPHA)
+                    surf.fill((88, 58, 247, 255))
+                    pygame.image.save(surf, str(resolved_dest))
+                else:
+                    resolved_dest.touch()
             return MockRequest(self.url, dest)
     class AsyncFetch:
         MAX_HEADER_BYTES = 8192
@@ -1305,6 +1472,8 @@ def install_mock_modules() -> None:
         except Exception:
             pass
     m_sec.require = lambda *args: True
+    m_sec.locked = lambda key: False
+    m_sec.save = lambda d: None
     sys.modules["secrets"] = m_sec
 
     # powman
