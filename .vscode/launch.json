@@ -52,12 +52,12 @@
             }
         },
         {
-            "name": "Universe 2026 Simulator: Flappy",
+            "name": "Universe 2026 Simulator: Flappy Mona",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/tools/simulator26.py",
             "args": [
-                "flappy"
+                "flappy_mona"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -66,23 +66,6 @@
                 "hidden": false,
                 "group": "simulator-2026",
                 "order": 3
-            }
-        },
-        {
-            "name": "Universe 2026 Simulator: Plucky Cluck",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/tools/simulator26.py",
-            "args": [
-                "plucky_cluck"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false,
-            "presentation": {
-                "hidden": false,
-                "group": "simulator-2026",
-                "order": 4
             }
         },
         {
@@ -99,7 +82,7 @@
             "presentation": {
                 "hidden": false,
                 "group": "simulator-2026",
-                "order": 5
+                "order": 4
             }
         },
         {

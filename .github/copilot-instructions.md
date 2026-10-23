@@ -30,7 +30,10 @@ The repository targets the **GitHub Universe 2026 badge** by default.
 - Use `screen.width` and `screen.height`; HIRES mode is 320x240 and the common
   logical mode is 160x120.
 - Keep `badge/secrets.py` empty in source control.
-- New apps need `badge/apps/<name>/__init__.py` and a 24x24 `icon.png`.
+- New apps need `badge/apps/<name>/__init__.py`, a 24x24 `icon.png`, and a
+  `README.md` whose first paragraph is a one-sentence description of the app
+  (followed by usage and any hardware or network requirements). The
+  `Validate app READMEs` check fails pull requests without one.
 - Use `mpremote devs` to discover a connected badge, then explicit
   `mpremote connect <port> ...` commands. Never run concurrent serial commands:
   only one process can own the USB serial port.
@@ -41,4 +44,4 @@ The repository targets the **GitHub Universe 2026 badge** by default.
 
 When porting a 2025 app, preserve behavior and assets but explicitly translate
 the graphics, input, timing, orientation, lifecycle, and state APIs. Use
-`badge/apps/input_test/`, `badge/apps/demos/` and `badge/apps/plucky_cluck/` as primary references.
+`badge/apps/input_test/`, `badge/apps/demos/` and `badge/apps/flappy_mona/` as primary references.
