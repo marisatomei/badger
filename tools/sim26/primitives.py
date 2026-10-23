@@ -223,6 +223,13 @@ class _ColorNamespace:
         r, g, b = colorsys.hsv_to_rgb(float(h) % 1.0, max(0.0, min(1.0, float(s))), max(0.0, min(1.0, float(v))))
         return ColorObj(round(r * 255), round(g * 255), round(b * 255), a)
 
+    @staticmethod
+    def oklch(l: float, c: float, h: float, a: int = 255) -> ColorObj:
+        import colorsys
+
+        r, g, b = colorsys.hsv_to_rgb((float(h) / 360.0) % 1.0, max(0.0, min(1.0, float(c) / 255.0)), max(0.0, min(1.0, float(l) / 255.0)))
+        return ColorObj(round(r * 255), round(g * 255), round(b * 255), a)
+
     black = ColorObj(0, 0, 0)
     white = ColorObj(255, 255, 255)
     grey = ColorObj(128, 128, 128)
@@ -335,24 +342,66 @@ class _ShapeNamespace:
     PATH_OPEN = 4
 
     @staticmethod
-    def regular_polygon(x: float, y: float, radius: float, sides: int = 4, rotation: float = 0.0) -> ShapeObj:
+    def regular_polygon(*args) -> ShapeObj:
+        if args and isinstance(args[0], (vec2, tuple, list)):
+            x, y = float(args[0][0]), float(args[0][1])
+            radius = float(args[1]) if len(args) > 1 else 1.0
+            sides = int(args[2]) if len(args) > 2 else 4
+            rotation = float(args[3]) if len(args) > 3 else 0.0
+        else:
+            x = float(args[0]) if len(args) > 0 else 0.0
+            y = float(args[1]) if len(args) > 1 else 0.0
+            radius = float(args[2]) if len(args) > 2 else 1.0
+            sides = int(args[3]) if len(args) > 3 else 4
+            rotation = float(args[4]) if len(args) > 4 else 0.0
         pts = []
-        angle_step = 2.0 * math.pi / max(3, int(sides))
-        for i in range(int(sides)):
-            angle = i * angle_step + rotation
-            pts.append(vec2(float(x) + float(radius) * math.cos(angle), float(y) + float(radius) * math.sin(angle)))
+        angle_step = 2.0 * math.pi / max(3, sides)
+        for i in range(max(3, sides)):
+            angle = i * angle_step + math.radians(rotation)
+            pts.append(vec2(x + radius * math.cos(angle), y + radius * math.sin(angle)))
         return ShapeObj("custom", points=pts)
 
     @staticmethod
-    def rectangle(x: float, y: float, w: float, h: float, radius: float = 0) -> ShapeObj:
-        return ShapeObj("rectangle", x=float(x), y=float(y), w=float(w), h=float(h), radius=float(radius))
+    def rectangle(*args) -> ShapeObj:
+        if len(args) == 1 and isinstance(args[0], (rect, tuple, list)):
+            r = args[0]
+            return ShapeObj("rectangle", x=float(r[0]), y=float(r[1]), w=float(r[2]), h=float(r[3]), radius=0.0)
+        if len(args) >= 2 and isinstance(args[0], (vec2, tuple, list)) and isinstance(args[1], (vec2, tuple, list)):
+            p, s = args[0], args[1]
+            rad = float(args[2]) if len(args) > 2 else 0.0
+            return ShapeObj("rectangle", x=float(p[0]), y=float(p[1]), w=float(s[0]), h=float(s[1]), radius=rad)
+        x = float(args[0]) if len(args) > 0 else 0.0
+        y = float(args[1]) if len(args) > 1 else 0.0
+        w = float(args[2]) if len(args) > 2 else 0.0
+        h = float(args[3]) if len(args) > 3 else 0.0
+        rad = float(args[4]) if len(args) > 4 else 0.0
+        return ShapeObj("rectangle", x=x, y=y, w=w, h=h, radius=rad)
 
     @staticmethod
-    def rounded_rectangle(x: float, y: float, w: float, h: float, radius: float, *radii) -> ShapeObj:
-        return ShapeObj("rounded_rectangle", x=float(x), y=float(y), w=float(w), h=float(h), radius=float(radius))
+    def rounded_rectangle(*args) -> ShapeObj:
+        if len(args) >= 2 and isinstance(args[0], (rect, tuple, list)) and len(args[0]) >= 4:
+            r = args[0]
+            return ShapeObj("rounded_rectangle", x=float(r[0]), y=float(r[1]), w=float(r[2]), h=float(r[3]), radius=float(args[1]))
+        if len(args) >= 2 and isinstance(args[0], (vec2, tuple, list)) and isinstance(args[1], (vec2, tuple, list)):
+            p, s = args[0], args[1]
+            rad = float(args[2]) if len(args) > 2 else 0.0
+            return ShapeObj("rounded_rectangle", x=float(p[0]), y=float(p[1]), w=float(s[0]), h=float(s[1]), radius=rad)
+        x = float(args[0]) if len(args) > 0 else 0.0
+        y = float(args[1]) if len(args) > 1 else 0.0
+        w = float(args[2]) if len(args) > 2 else 0.0
+        h = float(args[3]) if len(args) > 3 else 0.0
+        rad = float(args[4]) if len(args) > 4 else 0.0
+        return ShapeObj("rounded_rectangle", x=x, y=y, w=w, h=h, radius=rad)
 
     @staticmethod
-    def squircle(x: float, y: float, radius: float, power: float = 4) -> ShapeObj:
+    def squircle(*args) -> ShapeObj:
+        if args and isinstance(args[0], (vec2, tuple, list)):
+            x, y = float(args[0][0]), float(args[0][1])
+            radius = float(args[1]) if len(args) > 1 else 1.0
+        else:
+            x = float(args[0]) if len(args) > 0 else 0.0
+            y = float(args[1]) if len(args) > 1 else 0.0
+            radius = float(args[2]) if len(args) > 2 else 1.0
         return ShapeObj(
             "rounded_rectangle",
             x=float(x - radius),
@@ -394,16 +443,47 @@ class _ShapeNamespace:
         return ShapeObj("line", x1=0.0, y1=0.0, x2=0.0, y2=0.0, width=width)
 
     @staticmethod
-    def arc(cx: float, cy: float, r1: float, r2: float, a1: float = 0, a2: float = 360) -> ShapeObj:
-        return ShapeObj("circle", cx=float(cx), cy=float(cy), r=float(r2))
+    def arc(*args) -> ShapeObj:
+        if args and isinstance(args[0], (vec2, tuple, list)):
+            cx, cy = float(args[0][0]), float(args[0][1])
+            r2 = float(args[2]) if len(args) > 2 else (float(args[1]) if len(args) > 1 else 1.0)
+        else:
+            cx = float(args[0]) if len(args) > 0 else 0.0
+            cy = float(args[1]) if len(args) > 1 else 0.0
+            r2 = float(args[3]) if len(args) > 3 else (float(args[2]) if len(args) > 2 else 1.0)
+        return ShapeObj("circle", cx=cx, cy=cy, r=r2)
 
     @staticmethod
-    def pie(cx: float, cy: float, r: float, a1: float = 0, a2: float = 360) -> ShapeObj:
-        return ShapeObj("circle", cx=float(cx), cy=float(cy), r=float(r))
+    def pie(*args) -> ShapeObj:
+        if args and isinstance(args[0], (vec2, tuple, list)):
+            cx, cy = float(args[0][0]), float(args[0][1])
+            r = float(args[1]) if len(args) > 1 else 1.0
+        else:
+            cx = float(args[0]) if len(args) > 0 else 0.0
+            cy = float(args[1]) if len(args) > 1 else 0.0
+            r = float(args[2]) if len(args) > 2 else 1.0
+        return ShapeObj("circle", cx=cx, cy=cy, r=r)
 
     @staticmethod
     def star(*args, **kwargs) -> ShapeObj:
-        return ShapeObj("circle", cx=0, cy=0, r=10)
+        if args and isinstance(args[0], (vec2, tuple, list)):
+            cx, cy = float(args[0][0]), float(args[0][1])
+            n_pts = int(args[1]) if len(args) > 1 else 5
+            r1 = float(args[2]) if len(args) > 2 else 5.0
+            r2 = float(args[3]) if len(args) > 3 else 10.0
+        else:
+            cx = float(args[0]) if len(args) > 0 else 0.0
+            cy = float(args[1]) if len(args) > 1 else 0.0
+            n_pts = int(args[2]) if len(args) > 2 else 5
+            r1 = float(args[3]) if len(args) > 3 else 5.0
+            r2 = float(args[4]) if len(args) > 4 else 10.0
+        pts = []
+        total = max(3, n_pts) * 2
+        for i in range(total):
+            angle = i * math.pi / max(3, n_pts) - math.pi / 2.0
+            rad = r2 if i % 2 == 0 else r1
+            pts.append(vec2(cx + rad * math.cos(angle), cy + rad * math.sin(angle)))
+        return ShapeObj("custom", points=pts)
 
     @staticmethod
     def custom(*contours) -> ShapeObj:
