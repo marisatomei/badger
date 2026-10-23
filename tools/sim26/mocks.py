@@ -46,6 +46,15 @@ class State:
         except Exception:
             pass
 
+    @staticmethod
+    def delete(name: str) -> None:
+        path = STATE_DIR / f"{name}.json"
+        try:
+            if path.exists():
+                path.unlink()
+        except Exception:
+            pass
+
 
 # -----------------------------------------------------------------------------
 # Mock Hardware Modules

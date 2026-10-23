@@ -371,6 +371,14 @@ class _ShapeNamespace:
         return ShapeObj("circle", cx=cx, cy=cy, r=radius)
 
     @staticmethod
+    def ellipse(x: float | vec2, y: float = 0, rx: float = 0, ry: float = 0) -> ShapeObj:
+        if isinstance(x, (vec2, tuple, list)):
+            cx, cy, erx, ery = float(x[0]), float(x[1]), float(y), float(rx)
+        else:
+            cx, cy, erx, ery = float(x), float(y), float(rx), float(ry)
+        return ShapeObj("ellipse", cx=cx, cy=cy, rx=erx, ry=ery)
+
+    @staticmethod
     def line(*args, **kwargs) -> ShapeObj:
         width = float(kwargs.get("width", 1.0))
         if len(args) == 2 or (len(args) == 3 and not isinstance(args[2], (int, float))):

@@ -342,6 +342,14 @@ class SimulatorApp:
         if not self.running:
             raise SystemExit(0)
 
+        if (
+            BUTTON_BACK in self.badge_obj._pressed_this_frame
+            and not self.badge_obj._back_checked
+            and getattr(self, "current_app", "") != "menu"
+        ):
+            print("[Simulator] Back pressed. Returning to menu...")
+            self.reset()
+
         # 1. Input processing
         self.badge_obj._pressed_this_frame.clear()
         self.badge_obj._released_this_frame.clear()

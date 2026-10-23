@@ -351,6 +351,17 @@ class Image:
                 r *= math.hypot(sh.transform.m[0], sh.transform.m[3])
             pygame.draw.circle(self._surface, c, (int(round(cx)), int(round(cy))), max(0, int(round(r))), width=sw)
 
+        elif kind == "ellipse":
+            cx, cy, rx, ry = kw["cx"], kw["cy"], kw["rx"], kw["ry"]
+            if sh.transform:
+                cx, cy = sh.transform.transform_point(cx, cy)
+                rx *= math.hypot(sh.transform.m[0], sh.transform.m[3])
+                ry *= math.hypot(sh.transform.m[1], sh.transform.m[4])
+            ew = max(1, int(round(abs(rx) * 2)))
+            eh = max(1, int(round(abs(ry) * 2)))
+            erect = pygame.Rect(int(round(cx - ew / 2)), int(round(cy - eh / 2)), ew, eh)
+            pygame.draw.ellipse(self._surface, c, erect, width=sw)
+
         elif kind == "line":
             x1, y1, x2, y2 = kw["x1"], kw["y1"], kw["x2"], kw["y2"]
             lw = max(1, int(round(kw.get("width", 1.0))))
