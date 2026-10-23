@@ -537,6 +537,17 @@ class SimulatorApp:
                 print(f"[Simulator] Crash in {app_name}: {e}")
                 traceback.print_exc()
 
+        if self.running and app_name != "menu" and self.next_app_to_launch is None:
+            print(f"[Simulator] {app_name} exited. Returning to menu...")
+            m_machine = sys.modules.get("machine")
+            if m_machine is not None:
+                m_machine.reset_cause = lambda: m_machine.WDT_RESET
+            self.badge_obj._pressed_this_frame.clear()
+            self.badge_obj._current_keys.clear()
+            self.badge_obj._released_this_frame.clear()
+            self.badge_obj._touched_keys.clear()
+            self.next_app_to_launch = "/system/apps/menu"
+
         return None
 
     def reset(self) -> None:
