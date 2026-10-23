@@ -25,17 +25,252 @@ from sim26.vfs import BADGE_ROOT, map_system_path
 # -----------------------------------------------------------------------------
 
 
+_ICON_GLYPHS: dict[tuple[str, str], tuple[str, ...]] = {
+    # Food icons (12x12 interior, rendered into 14x16 with 1px outline)
+    ("food", "*"): (  # Candy
+        "............",
+        ".##......##.",
+        ".###.##.###.",
+        "..########..",
+        "...##@@##...",
+        "..###@#@@#..",
+        "..###@@###..",
+        "...######...",
+        "..########..",
+        ".###.##.###.",
+        ".##......##.",
+        "............",
+    ),
+    ("food", "7"): (  # Fruit
+        ".....@@.....",
+        "....@###....",
+        ".....@......",
+        "..########..",
+        ".##########.",
+        ".##@#@@####.",
+        ".##@#######.",
+        ".##########.",
+        ".##########.",
+        "..########..",
+        "...######...",
+        "............",
+    ),
+    ("food", "9"): (  # Burger
+        "...######...",
+        "..########..",
+        ".##@#@@#@##.",
+        ".##########.",
+        ".@@@@@@@@@@.",
+        "############",
+        ".@@@@@@@@@@.",
+        ".##########.",
+        ".##########.",
+        "..########..",
+        "............",
+        "............",
+    ),
+    ("food", ">"): (  # Pizza / wedge
+        ".##.........",
+        ".####.......",
+        ".#@####.....",
+        ".#@######...",
+        ".#@###@@###.",
+        ".#@########.",
+        ".#@##@@###..",
+        ".#@#####....",
+        ".#@###......",
+        ".###........",
+        "............",
+        "............",
+    ),
+    ("food", "2"): (  # Cupcake
+        ".....##.....",
+        "...######...",
+        "..########..",
+        ".###@##@###.",
+        ".##########.",
+        ".@@@@@@@@@@.",
+        "..########..",
+        "..#@#@@#@#..",
+        "..#@#@@#@#..",
+        "...######...",
+        "............",
+        "............",
+    ),
+    ("food", "I"): (  # Drink cup with straw
+        "......##....",
+        ".....##.....",
+        ".....##.....",
+        "..########..",
+        ".@@@@@@@@@@.",
+        "..########..",
+        "..########..",
+        "..@@@@@@@@..",
+        "...######...",
+        "...######...",
+        "...######...",
+        "............",
+    ),
+    # Hat icons
+    ("hats", ","): (  # Crown
+        "............",
+        ".#...##...#.",
+        ".##..##..##.",
+        ".###.##.###.",
+        ".##########.",
+        ".##########.",
+        ".##@#@@#@##.",
+        ".##########.",
+        ".@@@@@@@@@@.",
+        ".##########.",
+        "............",
+        "............",
+    ),
+    ("hats", "O"): (  # Bowler hat
+        "............",
+        "...######...",
+        "..########..",
+        ".##########.",
+        ".##########.",
+        ".##########.",
+        ".@@@@@@@@@@.",
+        "############",
+        "############",
+        ".##########.",
+        "............",
+        "............",
+    ),
+    ("hats", ">"): (  # Cap
+        "............",
+        "....####....",
+        "..########..",
+        ".#####@####.",
+        ".#####@####.",
+        ".#####@####.",
+        ".@@@@@@@@@@.",
+        ".###########",
+        "......######",
+        "............",
+        "............",
+        "............",
+    ),
+    ("hats", "J"): (  # Top hat
+        "..########..",
+        "..########..",
+        "..########..",
+        "..########..",
+        "..########..",
+        "..########..",
+        "..@@@@@@@@..",
+        "..########..",
+        "############",
+        "############",
+        "............",
+        "............",
+    ),
+    ("hats", "M"): (  # Beanie / party hat
+        "....####....",
+        "....####....",
+        "....@@@@....",
+        "...######...",
+        "..########..",
+        "..@@@@@@@@..",
+        ".##########.",
+        ".##########.",
+        "############",
+        "###@####@###",
+        "............",
+        "............",
+    ),
+    ("hats", "+"): (  # Propeller hat
+        "..###@@###..",
+        ".....@@.....",
+        "...######...",
+        "..########..",
+        ".##########.",
+        ".##########.",
+        ".@@@@@@@@@@.",
+        "############",
+        "............",
+        "............",
+        "............",
+        "............",
+    ),
+    # Emoji icons
+    ("emoji", ")"): (  # Sad face
+        "............",
+        "...######...",
+        "..########..",
+        ".##########.",
+        ".###@##@###.",
+        ".###@##@###.",
+        ".##########.",
+        ".###@@@@###.",
+        ".##@####@##.",
+        "..########..",
+        "...######...",
+        "............",
+    ),
+}
+
+
 class FontWrapper:
     def __init__(self, name: str, size: int):
-        self.name = name
+        self.name = str(name)
         self.size = size
         self._font = pygame.font.Font(None, size)
 
+    @property
+    def _base_family(self) -> str:
+        return self.name[:-8] if self.name.endswith("_outline") else self.name
+
+    @property
+    def _is_outline(self) -> bool:
+        return self.name.endswith("_outline")
+
     def measure_text(self, text: str) -> tuple[int, int]:
+        if self._base_family in ("food", "hats", "emoji"):
+            return (14 * max(1, len(str(text))), 16)
         return self._font.size(str(text))
 
     def render(self, text: str, col: pygame.Color) -> pygame.Surface:
-        return self._font.render(str(text), True, col)
+        s = str(text)
+        base = self._base_family
+        if (base, s) in _ICON_GLYPHS:
+            grid = _ICON_GLYPHS[(base, s)]
+            surf = pygame.Surface((14, 16), pygame.SRCALPHA)
+            filled = set()
+            inner = set()
+            for r, row in enumerate(grid):
+                for c, ch in enumerate(row):
+                    if ch == "#":
+                        filled.add((c + 1, r + 2))
+                    elif ch == "@":
+                        inner.add((c + 1, r + 2))
+            if not self._is_outline:
+                for x, y in filled:
+                    surf.set_at((x, y), col)
+            else:
+                solid = filled | inner
+                outline_px = set(inner)
+                for x, y in solid:
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            nx, ny = x + dx, y + dy
+                            if 0 <= nx < 14 and 0 <= ny < 16 and (nx, ny) not in solid:
+                                outline_px.add((nx, ny))
+                for x, y in outline_px:
+                    surf.set_at((x, y), col)
+            return surf
+
+        rendered = self._font.render(s, True, col)
+        if not self._is_outline:
+            return rendered
+        w, h = rendered.get_size()
+        out = pygame.Surface((w + 2, h + 2), pygame.SRCALPHA)
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            out.blit(rendered, (dx + 1, dy + 1))
+        return out
 
 
 class _FontNamespace:
@@ -518,7 +753,7 @@ class Image:
                 self._surface.blit(rendered, (x, y + i * line_h))
             return
 
-        rendered = font_obj.render(str(msg), True, c)
+        rendered = font_obj.render(str(msg), True, c) if size else self.font.render(str(msg), c)
         if self.alpha < 255:
             rendered.set_alpha(self.alpha)
         self._surface.blit(rendered, (x, y))
