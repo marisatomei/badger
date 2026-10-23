@@ -331,6 +331,9 @@ class SimulatorApp:
         builtins.file_exists = lambda p: os.path.exists(map_system_path(p))  # type: ignore
         builtins.is_dir = lambda p: os.path.isdir(map_system_path(p))  # type: ignore
         builtins.clamp = lambda val, low, high: max(low, min(high, val))  # type: ignore
+        _orig_range = getattr(builtins, "_orig_range", builtins.range)
+        builtins._orig_range = _orig_range  # type: ignore
+        builtins.range = lambda *a: _orig_range(*(int(x) if isinstance(x, float) else x for x in a))  # type: ignore
         builtins.ptr8 = lambda buf: memoryview(buf).cast("B")  # type: ignore
         builtins.ptr16 = lambda buf: memoryview(buf).cast("H")  # type: ignore
         builtins.ptr32 = lambda buf: memoryview(buf).cast("I")  # type: ignore
