@@ -10,6 +10,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Callable
 
 import pygame
@@ -318,6 +319,11 @@ class SimulatorApp:
         builtins.BOTTOM = Image.BOTTOM  # type: ignore
 
         builtins.display = DisplayMock()  # type: ignore
+        builtins.rtc = SimpleNamespace(
+            datetime=lambda *args: (lambda t: (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday))(
+                time.localtime()
+            )
+        )  # type: ignore
 
         builtins.run = self.run  # type: ignore
         builtins.launch = self.launch  # type: ignore
@@ -469,10 +475,10 @@ class SimulatorApp:
         mapped = map_system_path(app_path)
         p = Path(mapped)
         if not p.is_absolute():
-            if (REPO_ROOT / p).exists():
-                p = REPO_ROOT / p
-            elif (APPS_DIR / p).exists():
+            if (APPS_DIR / p).exists():
                 p = APPS_DIR / p
+            elif (REPO_ROOT / p).exists():
+                p = REPO_ROOT / p
             elif (BADGE_ROOT / p).exists():
                 p = BADGE_ROOT / p
 

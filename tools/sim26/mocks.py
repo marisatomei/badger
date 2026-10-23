@@ -131,8 +131,16 @@ def install_mock_modules() -> None:
             self.name = "My Badge"
             self.partner = None
             self.linked = False
+            self.central = True
+            self.journal = None
+
+        def capacity(self):
+            return 256
 
         def leave(self):
+            pass
+
+        def close(self):
             pass
 
         def pump(self):
@@ -145,11 +153,14 @@ def install_mock_modules() -> None:
             return []
 
         def send(self, data):
-            pass
+            return True
 
     class MockProximity:
+        cooldown_ms = 5000
+
         def __init__(self, link):
-            pass
+            self.cooldown_ms = 5000
+            self.sync_id = None
 
         def rest(self, *args):
             pass
@@ -177,7 +188,12 @@ def install_mock_modules() -> None:
         Link = MockLink
         Proximity = MockProximity
 
-        def draw_identicon(self, scr, badge_id, x, y, size):
+        def badge_id_hex(self, badge_id):
+            if isinstance(badge_id, (bytes, bytearray)):
+                return badge_id.hex()
+            return str(badge_id)
+
+        def draw_identicon(self, scr, badge_id, x, y, size, *args):
             avatar_path = STATE_DIR / "badge_avatar.png"
             if badge_id == b"\x12\x34\x56\x78\x9a\xbc\xde\xf0" and avatar_path.exists():
                 try:

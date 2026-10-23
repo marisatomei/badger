@@ -525,13 +525,26 @@ class Image:
             return
         pygame.draw.circle(self._surface, c, (cx, cy), max(0, r))
 
-    def line(self, x1: float, y1: float, x2: float, y2: float) -> None:
+    def line(self, *args) -> None:
         c = normalize_color(self.pen)
+        w = 1
+        if len(args) >= 2 and isinstance(args[0], (vec2, tuple, list)) and isinstance(args[1], (vec2, tuple, list)):
+            x1, y1 = args[0][0], args[0][1]
+            x2, y2 = args[1][0], args[1][1]
+            if len(args) >= 3:
+                w = max(1, int(round(args[2])))
+        elif len(args) >= 4:
+            x1, y1, x2, y2 = args[0], args[1], args[2], args[3]
+            if len(args) >= 5:
+                w = max(1, int(round(args[4])))
+        else:
+            return
         pygame.draw.line(
             self._surface,
             c,
             (int(round(x1)), int(round(y1))),
             (int(round(x2)), int(round(y2))),
+            w,
         )
 
     def shapes(self, shape_list: Any) -> None:
