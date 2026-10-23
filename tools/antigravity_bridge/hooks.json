@@ -1,0 +1,43 @@
+{
+  "antigravity-badge-sync": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python tools/antigravity_bridge/antigravity_bridge.py hook pre_invocation",
+        "timeout": 3
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/antigravity_bridge/antigravity_bridge.py hook pre_tool_use --read-stdin",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/antigravity_bridge/antigravity_bridge.py hook post_tool_use",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python tools/antigravity_bridge/antigravity_bridge.py hook stop",
+        "timeout": 3
+      }
+    ]
+  }
+}
