@@ -534,14 +534,22 @@ class Image:
             return
         pygame.draw.polygon(self._surface, c, pts)
 
-    def blit_vspan(self, src: Image, x: float, y: float, h: float, u: float, v1: float = 0.0, v2: float = 1.0) -> None:
+    def blit_vspan(
+        self, src: Image, x: float, y: float, h: float, u: float, v1: float = 0.0, v2: float = 1.0, *args
+    ) -> None:
         if not isinstance(src, Image) or h <= 0:
             return
+        if args:
+            # 8-arg form: (src, x, y, h, u1, v1, u2, v2)
+            v2 = float(args[0])
         sx = max(0, min(src.width - 1, int(u * src.width) if u <= 1.0 else int(u)))
         sy1 = max(0, min(src.height - 1, int(v1 * src.height) if v1 <= 1.0 else int(v1)))
         sy2 = max(sy1 + 1, min(src.height, int(v2 * src.height) if v2 <= 1.0 else int(v2)))
         col_surf = src._surface.subsurface(pygame.Rect(sx, sy1, 1, max(1, sy2 - sy1)))
         scaled = pygame.transform.scale(col_surf, (1, max(1, int(round(h)))))
+        if self.alpha < 255:
+            scaled = scaled.copy()
+            scaled.set_alpha(self.alpha)
         self._surface.blit(scaled, (int(round(x)), int(round(y))))
 
     def draw(self, sh: ShapeObj) -> None:
@@ -589,6 +597,7 @@ class Image:
 
     def line(self, *args) -> None:
         c = normalize_color(self.pen)
+        alpha = int(round(c.a * (self.alpha / 255.0)))
         w = 1
         if len(args) >= 2 and isinstance(args[0], (vec2, tuple, list)) and isinstance(args[1], (vec2, tuple, list)):
             x1, y1 = args[0][0], args[0][1]
@@ -601,11 +610,22 @@ class Image:
                 w = max(1, int(round(args[4])))
         else:
             return
+        ix1, iy1 = int(round(x1)), int(round(y1))
+        ix2, iy2 = int(round(x2)), int(round(y2))
+        if alpha <= 0:
+            return
+        if alpha < 255 and ix1 == ix2:
+            top_y, bot_y = min(iy1, iy2), max(iy1, iy2)
+            lh = max(1, bot_y - top_y + 1)
+            tmp = pygame.Surface((w, lh), pygame.SRCALPHA)
+            tmp.fill((c.r, c.g, c.b, alpha))
+            self._surface.blit(tmp, (ix1, top_y))
+            return
         pygame.draw.line(
             self._surface,
-            c,
-            (int(round(x1)), int(round(y1))),
-            (int(round(x2)), int(round(y2))),
+            pygame.Color(c.r, c.g, c.b, alpha),
+            (ix1, iy1),
+            (ix2, iy2),
             w,
         )
 

@@ -461,9 +461,35 @@ def install_mock_modules() -> None:
     builtins.micropython = m_mp  # type: ignore
 
     # wifi & ntptime & utime
+    class _MPTimeTuple(tuple):
+        def __new__(cls, st):
+            obj = super().__new__(
+                cls,
+                (st.tm_year, st.tm_mon, st.tm_mday, st.tm_hour, st.tm_min, st.tm_sec, st.tm_wday, st.tm_yday),
+            )
+            obj.tm_year = st.tm_year
+            obj.tm_mon = st.tm_mon
+            obj.tm_mday = st.tm_mday
+            obj.tm_hour = st.tm_hour
+            obj.tm_min = st.tm_min
+            obj.tm_sec = st.tm_sec
+            obj.tm_wday = st.tm_wday
+            obj.tm_yday = st.tm_yday
+            obj.tm_isdst = getattr(st, "tm_isdst", -1)
+            return obj
+
     _orig_time = getattr(time, "_orig_time", time.time)
+    _orig_gmtime = getattr(time, "_orig_gmtime", time.gmtime)
+    _orig_localtime = getattr(time, "_orig_localtime", time.localtime)
+    _orig_mktime = getattr(time, "_orig_mktime", time.mktime)
     time._orig_time = _orig_time  # type: ignore
+    time._orig_gmtime = _orig_gmtime  # type: ignore
+    time._orig_localtime = _orig_localtime  # type: ignore
+    time._orig_mktime = _orig_mktime  # type: ignore
     time.time = lambda: int(_orig_time())  # type: ignore
+    time.gmtime = lambda *a: _MPTimeTuple(_orig_gmtime(*a))  # type: ignore
+    time.localtime = lambda *a: _MPTimeTuple(_orig_localtime(*a))  # type: ignore
+    time.mktime = lambda t: int(_orig_mktime((*tuple(t), -1) if len(tuple(t)) == 8 else tuple(t)))  # type: ignore
     if not hasattr(time, "ticks_ms"):
         time.ticks_ms = lambda: int(time.monotonic() * 1000) & 0x3FFFFFFF  # type: ignore
         time.ticks_diff = lambda a, b: ((a - b + 0x20000000) & 0x3FFFFFFF) - 0x20000000  # type: ignore
