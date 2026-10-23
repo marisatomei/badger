@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Robotized Antigravity Icon offline character pack and launcher icon."""
+"""Build the Robotized Antigravity Arch offline character pack and launcher icon."""
 
 import argparse
 import hashlib
@@ -11,88 +11,55 @@ from PIL import Image, ImageDraw
 
 
 OUTPUT = Path(__file__).resolve().parents[1] / "badge/apps/Antigravity"
+LOGO_PATH = Path(__file__).resolve().parent / "antigravity_logo.png"
 SIZE = (192, 180)
 MAX_BUNDLE_BYTES = 3_000_000
 TRACKS = ("left", "right", "up", "down", "surprise", "working", "attention", "complete")
 
 
-def quadratic_bezier(p0, p1, p2, steps=16):
-    """Generate points along a quadratic Bezier curve."""
-    points = []
-    for i in range(steps + 1):
-        t = i / steps
-        it = 1.0 - t
-        x = it * it * p0[0] + 2 * it * t * p1[0] + t * t * p2[0]
-        y = it * it * p0[1] + 2 * it * t * p1[1] + t * t * p2[1]
-        points.append((x, y))
-    return points
-
-
-def get_spark_polygon(cx, cy, r, waist_ratio=0.32, waist_offset=0.0):
-    """Generate the boundary points for the Antigravity 4-pointed spark star."""
-    # 4 Tips
-    top = (cx, cy - r)
-    right = (cx + r, cy)
-    bottom = (cx, cy + r)
-    left = (cx - r, cy)
-
-    # 4 Inner concave control points (waist)
-    c_dist = r * waist_ratio
-    c_tr = (cx + c_dist, cy - c_dist + waist_offset)
-    c_br = (cx + c_dist, cy + c_dist + waist_offset)
-    c_bl = (cx - c_dist, cy + c_dist + waist_offset)
-    c_tl = (cx - c_dist, cy - c_dist + waist_offset)
-
-    pts = []
-    pts.extend(quadratic_bezier(top, c_tr, right))
-    pts.extend(quadratic_bezier(right, c_br, bottom)[1:])
-    pts.extend(quadratic_bezier(bottom, c_bl, left)[1:])
-    pts.extend(quadratic_bezier(left, c_tl, top)[1:-1])
-    return pts
-
-
-def draw_antigravity_frame(track, frame_idx, total_frames=12):
-    """Render a single frame of the Robotized Antigravity Mascot on a 192x180 RGB canvas."""
+def draw_antigravity_frame(base_logo, track, frame_idx, total_frames=12):
+    """Render a single frame of the Robotized Antigravity Arch mascot on a 192x180 RGB canvas."""
     scale = 2
     w, h = SIZE[0] * scale, SIZE[1] * scale
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 255))
-    draw = ImageDraw.Draw(img)
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 255))
 
-    # Center base
-    cx, cy = (96 * scale), (82 * scale)
+    # Base parameters for the arch body
+    logo_w, logo_h = int(126 * scale), int(126 * scale)
+    base_x = (w - logo_w) // 2
+    base_y = int(24 * scale)
 
     # Animation progress (0.0 to 1.0)
     t = frame_idx / float(max(1, total_frames - 1))
 
     # Mood-specific variables
-    eye_color = (66, 195, 255)       # Cyan / Google Blue LED
-    visor_glow = (30, 80, 160)
-    ring_color = (0, 210, 255)
-    tip_glow = (100, 200, 255)
+    eye_color = (66, 195, 255)       # Cyan LED
+    visor_glow = (60, 110, 190)
+    thruster_color = (0, 210, 255)
     body_shift_x = 0
     body_shift_y = 0
     body_tilt = 0.0
     eye_look_x = 0
     eye_look_y = 0
     eye_state = "open"
-    star_scale = 1.0
-    ring_phase = 0.0
+    squish_x = 1.0
+    squish_y = 1.0
     alert_symbol = None
     sparkle_burst = False
+    thruster_active = True
 
     if track == "neutral":
-        # Subtle zero-gravity float
+        # Gentle zero-gravity hover
         body_shift_y = math.sin(t * math.pi * 2) * 2.5 * scale
     elif track.startswith("blink-"):
         level = int(track.split("-")[1])
         eye_state = f"blink_{level}"
     elif track == "left":
         body_shift_x = -math.sin(t * math.pi) * 8 * scale
-        eye_look_x = -math.sin(t * math.pi) * 7 * scale
+        eye_look_x = -math.sin(t * math.pi) * 8 * scale
         body_tilt = -math.sin(t * math.pi) * 0.08
     elif track == "right":
         body_shift_x = math.sin(t * math.pi) * 8 * scale
-        eye_look_x = math.sin(t * math.pi) * 7 * scale
+        eye_look_x = math.sin(t * math.pi) * 8 * scale
         body_tilt = math.sin(t * math.pi) * 0.08
     elif track == "up":
         body_shift_y = -math.sin(t * math.pi) * 8 * scale
@@ -101,136 +68,93 @@ def draw_antigravity_frame(track, frame_idx, total_frames=12):
         body_shift_y = math.sin(t * math.pi) * 8 * scale
         eye_look_y = math.sin(t * math.pi) * 6 * scale
     elif track == "surprise":
-        # Quick levitation hop and wide eyes
+        # Upward startled hop with squish/stretch
         body_shift_y = -math.sin(t * math.pi) * 14 * scale
-        star_scale = 1.0 + math.sin(t * math.pi) * 0.08
+        squish_y = 1.0 + math.sin(t * math.pi) * 0.08
+        squish_x = 1.0 - math.sin(t * math.pi) * 0.06
         eye_state = "wide"
-        tip_glow = (255, 220, 100)
-        ring_color = (120, 230, 255)
+        thruster_color = (120, 230, 255)
         sparkle_burst = True
     elif track == "working":
-        # Active processing: rotating anti-gravity ring, focused eyes, pulsing energy tips
-        body_shift_y = math.sin(frame_idx * 0.5) * 2.5 * scale
-        ring_phase = frame_idx * (math.pi / 6)
+        # Active processing bounce with pulsing thrusters
+        body_shift_y = math.sin(frame_idx * 0.6) * 3 * scale
         eye_state = "focused"
-        ring_color = (66, 133, 244)
-        tip_glow = (120, 180, 255) if (frame_idx % 2 == 0) else (200, 230, 255)
+        thruster_color = (66, 133, 244) if (frame_idx % 2 == 0) else (140, 220, 255)
     elif track == "attention":
         # Amber warning glow, inquisitive tilt
-        body_shift_y = math.sin(frame_idx * 0.8) * 3 * scale
+        body_shift_y = math.sin(frame_idx * 0.8) * 3.5 * scale
         body_shift_x = math.sin(frame_idx * 0.4) * 2 * scale
-        body_tilt = 0.12 * math.sin(frame_idx * 0.6)
+        body_tilt = 0.10 * math.sin(frame_idx * 0.6)
         eye_color = (255, 180, 0)
-        visor_glow = (180, 110, 0)
-        ring_color = (255, 160, 0)
-        tip_glow = (255, 210, 50)
+        visor_glow = (200, 120, 0)
+        thruster_color = (255, 160, 0)
         alert_symbol = "!"
     elif track == "complete":
-        # Cheerful bounce, happy emerald glow
-        body_shift_y = -abs(math.sin(t * math.pi * 2)) * 12 * scale
+        # Celebratory hop, emerald green glow
+        body_shift_y = -abs(math.sin(t * math.pi * 2)) * 13 * scale
+        squish_y = 1.0 + math.sin(t * math.pi * 2) * 0.06
         eye_color = (76, 175, 80)
-        visor_glow = (27, 94, 32)
-        ring_color = (102, 187, 106)
-        tip_glow = (165, 214, 167)
+        visor_glow = (30, 110, 40)
+        thruster_color = (102, 187, 106)
         eye_state = "happy"
         sparkle_burst = True
 
-    bx = cx + body_shift_x
-    by = cy + body_shift_y
-
     # 1. Subtle anti-gravity ground shadow
-    shadow_w = 34 * scale
+    shadow_w = 42 * scale
     shadow_h = 7 * scale
-    shadow_y = (136 * scale)
-    draw.ellipse([cx - shadow_w, shadow_y - shadow_h, cx + shadow_w, shadow_y + shadow_h],
-                 fill=(15, 25, 45, 160))
+    shadow_y = int(140 * scale)
+    sdraw = ImageDraw.Draw(canvas)
+    sdraw.ellipse([w // 2 - shadow_w, shadow_y - shadow_h, w // 2 + shadow_w, shadow_y + shadow_h],
+                 fill=(15, 25, 45, 150))
 
-    # 2. Back half of Anti-gravity Propulsion Ring (orbits beneath bottom tip)
-    ring_rx = 36 * scale
-    ring_ry = 10 * scale
-    ring_cy = by + (32 * scale)
+    # 2. Transform and draw Antigravity Arch Body
+    curr_w = int(logo_w * squish_x)
+    curr_h = int(logo_h * squish_y)
+    body_img = base_logo.resize((curr_w, curr_h), Image.Resampling.LANCZOS)
 
-    for angle_deg in range(180, 360, 6):
-        rad = math.radians(angle_deg) + ring_phase
-        rx = bx + ring_rx * math.cos(rad)
-        ry = ring_cy + ring_ry * math.sin(rad)
-        draw.ellipse([rx - 2.5 * scale, ry - 2.5 * scale, rx + 2.5 * scale, ry + 2.5 * scale],
-                     fill=(*ring_color, 110))
+    if abs(body_tilt) > 0.01:
+        body_img = body_img.rotate(math.degrees(body_tilt), resample=Image.Resampling.BICUBIC, expand=True)
 
-    # 3. Robotized Antigravity Star Chassis
-    star_r = (48 * scale) * star_scale
+    lx = int(base_x + body_shift_x + (logo_w - body_img.width) / 2)
+    ly = int(base_y + body_shift_y + (logo_h - body_img.height) / 2)
+    canvas.alpha_composite(body_img, (lx, ly))
 
-    # Helper to rotate polygon if tilted
-    def apply_tilt(points, center_x, center_y, angle):
-        if abs(angle) < 0.001:
-            return points
-        cos_a = math.cos(angle)
-        sin_a = math.sin(angle)
-        res = []
-        for px, py in points:
-            dx = px - center_x
-            dy = py - center_y
-            rx = center_x + dx * cos_a - dy * sin_a
-            ry = center_y + dx * sin_a + dy * cos_a
-            res.append((rx, ry))
-        return res
+    # Center of visor (relative to scaled body)
+    vx = lx + body_img.width // 2
+    vy = ly + int(46 * scale * squish_y)
+    draw = ImageDraw.Draw(canvas)
 
-    # Outer armor hull (Google dark slate/metallic)
-    outer_poly = get_spark_polygon(bx, by, star_r, waist_ratio=0.34)
-    outer_poly = apply_tilt(outer_poly, bx, by, body_tilt)
-    draw.polygon(outer_poly, fill=(24, 32, 46, 255), outline=(70, 105, 155, 255))
+    # 3. Feet Hover Thrusters (underneath the two arch legs)
+    if thruster_active:
+        foot_y = ly + int(112 * scale * squish_y)
+        left_foot_x = lx + int(14 * scale)
+        right_foot_x = lx + body_img.width - int(14 * scale)
+        for fx in (left_foot_x, right_foot_x):
+            # Glowing oval thruster pulse
+            draw.ellipse([fx - 10 * scale, foot_y - 3 * scale,
+                          fx + 10 * scale, foot_y + 4 * scale],
+                         fill=(*thruster_color, 190))
+            draw.ellipse([fx - 5 * scale, foot_y - 1.5 * scale,
+                          fx + 5 * scale, foot_y + 2 * scale],
+                         fill=(255, 255, 255, 220))
 
-    # Inner armor plate with bevel
-    inner_poly = get_spark_polygon(bx, by, star_r * 0.90, waist_ratio=0.33)
-    inner_poly = apply_tilt(inner_poly, bx, by, body_tilt)
-    draw.polygon(inner_poly, fill=(32, 44, 64, 255), outline=(90, 130, 185, 255))
+    # 4. Robot Visor (Pill-shaped tinted face)
+    vw, vh = int(24 * scale), int(15 * scale)
+    # Beveled metallic visor frame
+    draw.rounded_rectangle([vx - vw - 2 * scale, vy - vh - 2 * scale,
+                            vx + vw + 2 * scale, vy + vh + 2 * scale],
+                           radius=9 * scale, fill=(20, 28, 42, 230),
+                           outline=(70, 105, 155, 255), width=int(scale))
+    # Tinted glass
+    draw.rounded_rectangle([vx - vw, vy - vh, vx + vw, vy + vh],
+                           radius=7 * scale, fill=(10, 14, 22, 255),
+                           outline=visor_glow, width=int(1.5 * scale))
 
-    # Star tip cybernetic nodes / thruster caps
-    tip_coords = [
-        (bx, by - star_r),       # Top
-        (bx + star_r, by),       # Right
-        (bx, by + star_r),       # Bottom
-        (bx - star_r, by),       # Left
-    ]
-    tip_coords = apply_tilt(tip_coords, bx, by, body_tilt)
-
-    for tx, ty in tip_coords:
-        tr = 4.0 * scale
-        draw.ellipse([tx - tr, ty - tr, tx + tr, ty + tr],
-                     fill=tip_glow, outline=(255, 255, 255, 220), width=scale)
-
-    # Waist cybernetic rivets/nodes
-    waist_coords = [
-        (bx + star_r * 0.33, by - star_r * 0.33),
-        (bx + star_r * 0.33, by + star_r * 0.33),
-        (bx - star_r * 0.33, by + star_r * 0.33),
-        (bx - star_r * 0.33, by - star_r * 0.33),
-    ]
-    waist_coords = apply_tilt(waist_coords, bx, by, body_tilt)
-    for wx, wy in waist_coords:
-        wr = 2.0 * scale
-        draw.ellipse([wx - wr, wy - wr, wx + wr, wy + wr], fill=(66, 133, 244, 200))
-
-    # 4. Front half of Anti-gravity Propulsion Ring (crosses over bottom point)
-    for angle_deg in range(0, 185, 6):
-        rad = math.radians(angle_deg) + ring_phase
-        rx = bx + ring_rx * math.cos(rad)
-        ry = ring_cy + ring_ry * math.sin(rad)
-        draw.ellipse([rx - 2.5 * scale, ry - 2.5 * scale, rx + 2.5 * scale, ry + 2.5 * scale],
-                     fill=(*ring_color, 230))
-
-    # 5. Center Robot Face / Tinted Visor
-    visor_w = 23 * scale
-    visor_h = 14 * scale
-    draw.rounded_rectangle([bx - visor_w, by - visor_h, bx + visor_w, by + visor_h],
-                           radius=9 * scale, fill=(10, 14, 22, 255),
-                           outline=visor_glow, width=2 * scale)
-
-    # 6. Expressive LED Eyes inside Visor
-    eye_offset_x = 9 * scale
-    lex = bx - eye_offset_x + eye_look_x
-    rex = bx + eye_offset_x + eye_look_x
-    ey = by + eye_look_y
+    # 5. Expressive Digital LED Eyes
+    eye_offset_x = int(10 * scale)
+    lex = vx - eye_offset_x + eye_look_x
+    rex = vx + eye_offset_x + eye_look_x
+    ey = vy + eye_look_y
 
     if eye_state == "wide":
         ew, eh = 7 * scale, 9 * scale
@@ -239,11 +163,13 @@ def draw_antigravity_frame(track, frame_idx, total_frames=12):
         draw.ellipse([lex - 2 * scale, ey - 3 * scale, lex + 2 * scale, ey + scale], fill=(255, 255, 255))
         draw.ellipse([rex - 2 * scale, ey - 3 * scale, rex + 2 * scale, ey + scale], fill=(255, 255, 255))
     elif eye_state == "focused":
-        # Scanning digital visor slits
+        # Scanning laser digital slits
         draw.rounded_rectangle([lex - 6 * scale, ey - 2.5 * scale, lex + 6 * scale, ey + 2.5 * scale],
                                radius=scale, fill=eye_color)
         draw.rounded_rectangle([rex - 6 * scale, ey - 2.5 * scale, rex + 6 * scale, ey + 2.5 * scale],
                                radius=scale, fill=eye_color)
+        # Laser scanning wave
+        draw.line([vx - vw + 4 * scale, vy, vx + vw - 4 * scale, vy], fill=(*eye_color, 120), width=int(scale))
     elif eye_state == "happy":
         # Cheerful happy eyes ^ ^
         for ex in (lex, rex):
@@ -260,23 +186,24 @@ def draw_antigravity_frame(track, frame_idx, total_frames=12):
         ew, eh = 5.5 * scale, 6.5 * scale
         draw.ellipse([lex - ew, ey - eh, lex + ew, ey + eh], fill=eye_color)
         draw.ellipse([rex - ew, ey - eh, rex + ew, ey + eh], fill=eye_color)
+        # Eye pupil highlights
         draw.ellipse([lex - scale, ey - 2.5 * scale, lex + 1.5 * scale, ey], fill=(255, 255, 255, 220))
         draw.ellipse([rex - scale, ey - 2.5 * scale, rex + 1.5 * scale, ey], fill=(255, 255, 255, 220))
 
-    # 7. Sparkle burst or alert overlay
+    # 6. Sparkle bursts or alert badge
     if sparkle_burst:
-        for angle in (0.2, 1.8, 3.4, 4.8):
-            sp_x = bx + math.cos(angle) * (star_r + 9 * scale)
-            sp_y = by + math.sin(angle) * (star_r + 9 * scale)
+        for angle in (0.3, 1.5, 3.2, 4.6):
+            sp_x = vx + math.cos(angle) * (vw + 16 * scale)
+            sp_y = vy + math.sin(angle) * (vh + 14 * scale)
             draw.ellipse([sp_x - 2 * scale, sp_y - 2 * scale, sp_x + 2 * scale, sp_y + 2 * scale],
                          fill=(255, 255, 255, 230))
 
     if alert_symbol:
-        draw.text((bx + 28 * scale, by - 26 * scale), alert_symbol, fill=(255, 200, 0), font=None)
+        draw.text((vx + vw + 4 * scale, vy - vh - 6 * scale), alert_symbol, fill=(255, 200, 0), font=None)
 
-    # Downsample back to target 192x180 RGB canvas
+    # Downsample back to 192x180 RGB canvas
     final_img = Image.new("RGB", SIZE, (0, 0, 0))
-    downsampled = img.resize(SIZE, Image.Resampling.LANCZOS)
+    downsampled = canvas.resize(SIZE, Image.Resampling.LANCZOS)
     final_img.paste(downsampled, (0, 0), downsampled.convert("RGBA"))
     return final_img
 
@@ -284,6 +211,11 @@ def draw_antigravity_frame(track, frame_idx, total_frames=12):
 def build(output_dir):
     assets_dir = output_dir / "assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
+
+    if not LOGO_PATH.is_file():
+        raise FileNotFoundError(f"Missing base logo at {LOGO_PATH}")
+
+    base_logo = Image.open(LOGO_PATH).convert("RGBA")
 
     jobs = [("neutral", "neutral", 0)]
     for lvl in range(1, 5):
@@ -294,48 +226,38 @@ def build(output_dir):
             jobs.append((f"{track}-{idx:02d}", track, idx))
 
     files_meta = []
-    print(f"Generating {len(jobs)} Robotized Antigravity Mascot frames...")
+    print(f"Generating {len(jobs)} Robotized Antigravity Arch Mascot frames...")
 
     for name, track, idx in jobs:
-        frame = draw_antigravity_frame(track, idx)
+        frame = draw_antigravity_frame(base_logo, track, idx)
         out_path = assets_dir / f"{name}.png"
         frame.save(out_path, optimize=True)
         raw_bytes = out_path.read_bytes()
         files_meta.append({
             "file": f"{name}.png",
-            "source": f"procedural/robot_spark/{name}",
+            "source": f"procedural/antigravity_arch/{name}",
             "sha256": hashlib.sha256(raw_bytes).hexdigest()
         })
 
-    # Generate 24x24 icon.png for launcher (robotized Antigravity star)
+    # Generate 24x24 icon.png for launcher
     icon_scale = 4
     icon_w = 24 * icon_scale
-    icon_img = Image.new("RGBA", (icon_w, icon_w), (0, 0, 0, 255))
-    idraw = ImageDraw.Draw(icon_img)
-    icx, icy = icon_w // 2, icon_w // 2
+    icon_canvas = Image.new("RGBA", (icon_w, icon_w), (0, 0, 0, 255))
+    mini_logo = base_logo.resize((int(20 * icon_scale), int(20 * icon_scale)), Image.Resampling.LANCZOS)
+    icon_canvas.alpha_composite(mini_logo, (int(2 * icon_scale), int(2 * icon_scale)))
 
-    # Star shape for icon
-    icon_r = 10 * icon_scale
-    icon_star = get_spark_polygon(icx, icy, icon_r, waist_ratio=0.34)
-    idraw.polygon(icon_star, fill=(32, 44, 64), outline=(90, 130, 185), width=icon_scale)
-
-    # Mini glowing tips
-    for tx, ty in [(icx, icy - icon_r), (icx + icon_r, icy), (icx, icy + icon_r), (icx - icon_r, icy)]:
-        idraw.ellipse([tx - 1.5 * icon_scale, ty - 1.5 * icon_scale,
-                       tx + 1.5 * icon_scale, ty + 1.5 * icon_scale], fill=(100, 200, 255))
-
-    # Center mini visor
-    vw, vh = 5 * icon_scale, 3.5 * icon_scale
+    idraw = ImageDraw.Draw(icon_canvas)
+    icx, icy = icon_w // 2, int(9 * icon_scale)
+    vw, vh = int(4.5 * icon_scale), int(3 * icon_scale)
     idraw.rounded_rectangle([icx - vw, icy - vh, icx + vw, icy + vh],
-                            radius=2 * icon_scale, fill=(10, 14, 22), outline=(30, 80, 160))
-    # Eyes
-    idraw.ellipse([icx - 3 * icon_scale, icy - icon_scale, icx - icon_scale, icy + icon_scale],
+                            radius=int(1.5 * icon_scale), fill=(10, 14, 22), outline=(30, 80, 160))
+    idraw.ellipse([icx - 2.5 * icon_scale, icy - icon_scale, icx - 0.5 * icon_scale, icy + icon_scale],
                   fill=(66, 195, 255))
-    idraw.ellipse([icx + icon_scale, icy - icon_scale, icx + 3 * icon_scale, icy + icon_scale],
+    idraw.ellipse([icx + 0.5 * icon_scale, icy - icon_scale, icx + 2.5 * icon_scale, icy + icon_scale],
                   fill=(66, 195, 255))
 
     icon_final = Image.new("RGB", (24, 24), (0, 0, 0))
-    icon_downsampled = icon_img.resize((24, 24), Image.Resampling.LANCZOS)
+    icon_downsampled = icon_canvas.resize((24, 24), Image.Resampling.LANCZOS)
     icon_final.paste(icon_downsampled, (0, 0), icon_downsampled.convert("RGBA"))
     icon_path = output_dir / "icon.png"
     icon_final.save(icon_path, optimize=True)
@@ -357,7 +279,7 @@ def build(output_dir):
         "repository": "https://github.com/google-antigravity/antigravity",
         "size": list(SIZE),
         "frames_per_track": 12,
-        "conversion": "Robotized Antigravity Spark Star mascot, RGB 192x180; Pillow",
+        "conversion": "Robotized Antigravity Arch mascot, RGB 192x180; Pillow",
         "files": files_meta
     }
     (assets_dir / "sources.json").write_text(json.dumps(metadata, indent=2) + "\n")
