@@ -487,14 +487,19 @@ class SimulatorApp:
 
         app_name = target_py.parent.name
         app_dir = str(target_py.parent.resolve())
+        apps_root = str(APPS_DIR.resolve())
         for mod_name, mod_obj in list(sys.modules.items()):
             mod_file = getattr(mod_obj, "__file__", None)
-            if mod_file and str(APPS_DIR) in str(Path(mod_file).resolve()):
+            if mod_file and str(Path(mod_file).resolve()).startswith(apps_root):
                 sys.modules.pop(mod_name, None)
+        sys.path[:] = [
+            entry
+            for entry in sys.path
+            if not str(Path(map_system_path(entry)).resolve()).startswith(apps_root)
+        ]
+        sys.path.insert(0, app_dir)
         self.screen_obj.clip = None
         self.screen_obj.alpha = 255
-        if app_dir not in sys.path:
-            sys.path.insert(0, app_dir)
         try:
             os.chdir(app_dir)
         except Exception:
