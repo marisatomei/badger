@@ -5,512 +5,512 @@
     180
   ],
   "frames_per_track": 12,
-  "conversion": "Antialiased procedural mascot generation, RGB 192x180; Pillow",
+  "conversion": "Robotized Antigravity Spark Star mascot, RGB 192x180; Pillow",
   "files": [
     {
       "file": "neutral.png",
-      "source": "procedural/neutral/neutral",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/neutral",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "blink-1.png",
-      "source": "procedural/blink-1/blink-1",
-      "sha256": "e991ed606501a3bf0ff1b425cebf8bc3ab9bc8bf58d7263e9ff071c56767ac37"
+      "source": "procedural/robot_spark/blink-1",
+      "sha256": "42797bd325f81605d576a49fc23a8551d8d27194f82b382839b66f26ec2fca35"
     },
     {
       "file": "blink-2.png",
-      "source": "procedural/blink-2/blink-2",
-      "sha256": "58eb60fd77b24c8afe4b899093e0b5303fdfa2a7e7d582a53d40139890c6c558"
+      "source": "procedural/robot_spark/blink-2",
+      "sha256": "7aef5d41b06abe18b5fd26026ddbcdfeb2805c07ec79d4ac7d29837beb4a05ea"
     },
     {
       "file": "blink-3.png",
-      "source": "procedural/blink-3/blink-3",
-      "sha256": "b499c2b221c593270a5504207188e81ed7dfc8e3a6a375b9b804698bcea281d9"
+      "source": "procedural/robot_spark/blink-3",
+      "sha256": "beee7f515ee9302d1d41fdc3db307f803604edb65c2b543dc21fcbb2c850b0cf"
     },
     {
       "file": "blink-4.png",
-      "source": "procedural/blink-4/blink-4",
-      "sha256": "b88c331a04aef123947756a6c6d4b70a4be9ad4b8dffbc77c2f69042294b5c08"
+      "source": "procedural/robot_spark/blink-4",
+      "sha256": "0e8e017ed51e14a057604374637b7a815c80b8e6f5d87d4928fc242081a97029"
     },
     {
       "file": "left-00.png",
-      "source": "procedural/left/left-00",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/left-00",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "left-01.png",
-      "source": "procedural/left/left-01",
-      "sha256": "6bcb78bcac38fb298d1b4df0c43aabb1374e6c192dd73130fe636e85112a3ba6"
+      "source": "procedural/robot_spark/left-01",
+      "sha256": "7bbf61e37d78c01dbe14723f60cb45edc6fa6914847e8f10646da7aec0b084fb"
     },
     {
       "file": "left-02.png",
-      "source": "procedural/left/left-02",
-      "sha256": "9e38f6f90076cba7ade82a4c18fffa88f0a7444b8c2fa397fcc6b4f0b4ea546c"
+      "source": "procedural/robot_spark/left-02",
+      "sha256": "c99d30870b8fb499179e5df7a44d81585569a111912db1969c6d70c57b937782"
     },
     {
       "file": "left-03.png",
-      "source": "procedural/left/left-03",
-      "sha256": "d5f7ac8ac44bdc2b579a7a221ff8f09cbaa229311262381a2afa3d70444e7278"
+      "source": "procedural/robot_spark/left-03",
+      "sha256": "9e24f229d0be440906348449e09fae8334b871a3f5b9d491fb5c53d53fbb58b1"
     },
     {
       "file": "left-04.png",
-      "source": "procedural/left/left-04",
-      "sha256": "c363370a91890bbb447aac4be86e95bc6d5fea08e112a971beeeca3a317d7ffd"
+      "source": "procedural/robot_spark/left-04",
+      "sha256": "156369b565ee55a8fe17e62a633af519e522a55dcf9a9ab95164f1750a04f955"
     },
     {
       "file": "left-05.png",
-      "source": "procedural/left/left-05",
-      "sha256": "e81af8fd81601bdfa74ab79b7d501aeccfbdefa7f734d295457687580bb8d859"
+      "source": "procedural/robot_spark/left-05",
+      "sha256": "4223f17f97beecbdebe76170255d91563e0455564c27363d62bd21b28ea9a827"
     },
     {
       "file": "left-06.png",
-      "source": "procedural/left/left-06",
-      "sha256": "e81af8fd81601bdfa74ab79b7d501aeccfbdefa7f734d295457687580bb8d859"
+      "source": "procedural/robot_spark/left-06",
+      "sha256": "4223f17f97beecbdebe76170255d91563e0455564c27363d62bd21b28ea9a827"
     },
     {
       "file": "left-07.png",
-      "source": "procedural/left/left-07",
-      "sha256": "c363370a91890bbb447aac4be86e95bc6d5fea08e112a971beeeca3a317d7ffd"
+      "source": "procedural/robot_spark/left-07",
+      "sha256": "156369b565ee55a8fe17e62a633af519e522a55dcf9a9ab95164f1750a04f955"
     },
     {
       "file": "left-08.png",
-      "source": "procedural/left/left-08",
-      "sha256": "d5f7ac8ac44bdc2b579a7a221ff8f09cbaa229311262381a2afa3d70444e7278"
+      "source": "procedural/robot_spark/left-08",
+      "sha256": "9e24f229d0be440906348449e09fae8334b871a3f5b9d491fb5c53d53fbb58b1"
     },
     {
       "file": "left-09.png",
-      "source": "procedural/left/left-09",
-      "sha256": "9e38f6f90076cba7ade82a4c18fffa88f0a7444b8c2fa397fcc6b4f0b4ea546c"
+      "source": "procedural/robot_spark/left-09",
+      "sha256": "c99d30870b8fb499179e5df7a44d81585569a111912db1969c6d70c57b937782"
     },
     {
       "file": "left-10.png",
-      "source": "procedural/left/left-10",
-      "sha256": "6bcb78bcac38fb298d1b4df0c43aabb1374e6c192dd73130fe636e85112a3ba6"
+      "source": "procedural/robot_spark/left-10",
+      "sha256": "7bbf61e37d78c01dbe14723f60cb45edc6fa6914847e8f10646da7aec0b084fb"
     },
     {
       "file": "left-11.png",
-      "source": "procedural/left/left-11",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/left-11",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "right-00.png",
-      "source": "procedural/right/right-00",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/right-00",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "right-01.png",
-      "source": "procedural/right/right-01",
-      "sha256": "da4a3554dbd999f6bfe041e68105746c508785c2a83a02913a94f6733a9c18c0"
+      "source": "procedural/robot_spark/right-01",
+      "sha256": "927909fbcddba384d8b8ce08f9d885f3a9123ee34f6481225abf76bdff2caf1d"
     },
     {
       "file": "right-02.png",
-      "source": "procedural/right/right-02",
-      "sha256": "7cedc35fdb2faefc3e857d4cedfd8e4f892d075e150c83366fcb082861fbbce6"
+      "source": "procedural/robot_spark/right-02",
+      "sha256": "5b9d4288ee7a0f7d4f46c321a7c17139421b86823457c6421f9d47a15242e338"
     },
     {
       "file": "right-03.png",
-      "source": "procedural/right/right-03",
-      "sha256": "09f58a2ef814c5a9c8f402444debf3a6580a81fc2a76fd992ee6e6c1269c09ea"
+      "source": "procedural/robot_spark/right-03",
+      "sha256": "49f352e6777118990d89644a1b639e215f1436ee1f9293c47f05bb1a7cbd8458"
     },
     {
       "file": "right-04.png",
-      "source": "procedural/right/right-04",
-      "sha256": "aa0b065cfbd43024a825be9a0043441870bf53e8a00ffa906c4e0e30069b1508"
+      "source": "procedural/robot_spark/right-04",
+      "sha256": "2b10c499bae6dc505df1f69d962e7b9a1fe9c199e7ddb1cbdb969ffccfc8fbb1"
     },
     {
       "file": "right-05.png",
-      "source": "procedural/right/right-05",
-      "sha256": "a8a89f2bfd9a3a6e495efdb4337ea1596a7bc39260bfa82d99fb1276f2082de1"
+      "source": "procedural/robot_spark/right-05",
+      "sha256": "384b2351a4e20d965fd19d2c0d4c0e484e77d414567b03dd8d1e83421d4a17c1"
     },
     {
       "file": "right-06.png",
-      "source": "procedural/right/right-06",
-      "sha256": "a8a89f2bfd9a3a6e495efdb4337ea1596a7bc39260bfa82d99fb1276f2082de1"
+      "source": "procedural/robot_spark/right-06",
+      "sha256": "384b2351a4e20d965fd19d2c0d4c0e484e77d414567b03dd8d1e83421d4a17c1"
     },
     {
       "file": "right-07.png",
-      "source": "procedural/right/right-07",
-      "sha256": "aa0b065cfbd43024a825be9a0043441870bf53e8a00ffa906c4e0e30069b1508"
+      "source": "procedural/robot_spark/right-07",
+      "sha256": "2b10c499bae6dc505df1f69d962e7b9a1fe9c199e7ddb1cbdb969ffccfc8fbb1"
     },
     {
       "file": "right-08.png",
-      "source": "procedural/right/right-08",
-      "sha256": "09f58a2ef814c5a9c8f402444debf3a6580a81fc2a76fd992ee6e6c1269c09ea"
+      "source": "procedural/robot_spark/right-08",
+      "sha256": "49f352e6777118990d89644a1b639e215f1436ee1f9293c47f05bb1a7cbd8458"
     },
     {
       "file": "right-09.png",
-      "source": "procedural/right/right-09",
-      "sha256": "7cedc35fdb2faefc3e857d4cedfd8e4f892d075e150c83366fcb082861fbbce6"
+      "source": "procedural/robot_spark/right-09",
+      "sha256": "5b9d4288ee7a0f7d4f46c321a7c17139421b86823457c6421f9d47a15242e338"
     },
     {
       "file": "right-10.png",
-      "source": "procedural/right/right-10",
-      "sha256": "da4a3554dbd999f6bfe041e68105746c508785c2a83a02913a94f6733a9c18c0"
+      "source": "procedural/robot_spark/right-10",
+      "sha256": "927909fbcddba384d8b8ce08f9d885f3a9123ee34f6481225abf76bdff2caf1d"
     },
     {
       "file": "right-11.png",
-      "source": "procedural/right/right-11",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/right-11",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "up-00.png",
-      "source": "procedural/up/up-00",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/up-00",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "up-01.png",
-      "source": "procedural/up/up-01",
-      "sha256": "e571a4faededc110263382c1ab409379694441fbf2fadfa5296f550cfde01530"
+      "source": "procedural/robot_spark/up-01",
+      "sha256": "24d3d3c868c3323176a5938deea94048e2409ea0d2a624fb0d142e846c63e8fb"
     },
     {
       "file": "up-02.png",
-      "source": "procedural/up/up-02",
-      "sha256": "66c57b9be862a47e56cfe34a325e36670479664745687f7bc7d75bae3329a308"
+      "source": "procedural/robot_spark/up-02",
+      "sha256": "a482b293fd37430a6e150f07608789f2451f1944a4e2d8a50cbf384bb2907ebe"
     },
     {
       "file": "up-03.png",
-      "source": "procedural/up/up-03",
-      "sha256": "34659e3c4a4318b14de82632df0d59022ea052f43e116709245240cb2c663684"
+      "source": "procedural/robot_spark/up-03",
+      "sha256": "09dc29a56414113336cfbbe4baf8bb3425b774d392007eabdf4cb0184847713a"
     },
     {
       "file": "up-04.png",
-      "source": "procedural/up/up-04",
-      "sha256": "4f3926a1b280ed2a4575dc076f2be6aec417dbd5ca9b1900a195401514fdc113"
+      "source": "procedural/robot_spark/up-04",
+      "sha256": "1d2f16a8201704819f7081b08dc18345050ba960a75499a9ab16eb9de3ded13c"
     },
     {
       "file": "up-05.png",
-      "source": "procedural/up/up-05",
-      "sha256": "ccaa8e1dfb6b59210861749749c03e4a14ca68afc094b9f256f175f02bc2652d"
+      "source": "procedural/robot_spark/up-05",
+      "sha256": "5520b5a4445c28fe76728b6b04cb304a92003329bb35bec0a7e062780bc3a1d8"
     },
     {
       "file": "up-06.png",
-      "source": "procedural/up/up-06",
-      "sha256": "ccaa8e1dfb6b59210861749749c03e4a14ca68afc094b9f256f175f02bc2652d"
+      "source": "procedural/robot_spark/up-06",
+      "sha256": "5520b5a4445c28fe76728b6b04cb304a92003329bb35bec0a7e062780bc3a1d8"
     },
     {
       "file": "up-07.png",
-      "source": "procedural/up/up-07",
-      "sha256": "4f3926a1b280ed2a4575dc076f2be6aec417dbd5ca9b1900a195401514fdc113"
+      "source": "procedural/robot_spark/up-07",
+      "sha256": "1d2f16a8201704819f7081b08dc18345050ba960a75499a9ab16eb9de3ded13c"
     },
     {
       "file": "up-08.png",
-      "source": "procedural/up/up-08",
-      "sha256": "34659e3c4a4318b14de82632df0d59022ea052f43e116709245240cb2c663684"
+      "source": "procedural/robot_spark/up-08",
+      "sha256": "09dc29a56414113336cfbbe4baf8bb3425b774d392007eabdf4cb0184847713a"
     },
     {
       "file": "up-09.png",
-      "source": "procedural/up/up-09",
-      "sha256": "66c57b9be862a47e56cfe34a325e36670479664745687f7bc7d75bae3329a308"
+      "source": "procedural/robot_spark/up-09",
+      "sha256": "a482b293fd37430a6e150f07608789f2451f1944a4e2d8a50cbf384bb2907ebe"
     },
     {
       "file": "up-10.png",
-      "source": "procedural/up/up-10",
-      "sha256": "e571a4faededc110263382c1ab409379694441fbf2fadfa5296f550cfde01530"
+      "source": "procedural/robot_spark/up-10",
+      "sha256": "24d3d3c868c3323176a5938deea94048e2409ea0d2a624fb0d142e846c63e8fb"
     },
     {
       "file": "up-11.png",
-      "source": "procedural/up/up-11",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/up-11",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "down-00.png",
-      "source": "procedural/down/down-00",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/down-00",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "down-01.png",
-      "source": "procedural/down/down-01",
-      "sha256": "fbeec0ce84b7e01b691e67876f02186f34e25cd1669a2054dfcb410d50bf853e"
+      "source": "procedural/robot_spark/down-01",
+      "sha256": "9b82041411a45c867395b8952366d3de8ad885a3eabcf564e7af0d5756f115aa"
     },
     {
       "file": "down-02.png",
-      "source": "procedural/down/down-02",
-      "sha256": "0a5196e1aa241338ba295b2d0e0baf3092ffebaa92aed83268217c6a892ea108"
+      "source": "procedural/robot_spark/down-02",
+      "sha256": "c92dba34932fb3ae5195d6a2421736acd95fcafadf30f15a39a6f392d7cc538a"
     },
     {
       "file": "down-03.png",
-      "source": "procedural/down/down-03",
-      "sha256": "5a5bc6a1bbcd1cfea852aa4820194b0cec12722b051630a9894d054fe8076c7f"
+      "source": "procedural/robot_spark/down-03",
+      "sha256": "f637a171f6dcc64c7f58e985f018fb9a34be851884194a3a4b638199897f667b"
     },
     {
       "file": "down-04.png",
-      "source": "procedural/down/down-04",
-      "sha256": "c8590e23e5ee83f9c976d7e2b9bfc114269294801b56bb7b3168833734318ac3"
+      "source": "procedural/robot_spark/down-04",
+      "sha256": "f5feedf8950f93d4ad98c515102bdea25a1944b8825b91dccd8d95d005696a94"
     },
     {
       "file": "down-05.png",
-      "source": "procedural/down/down-05",
-      "sha256": "11ea40eb2923e0f89af0d58ed40b10d7fd8de8a9e585e1b98ce674cd449ab4f5"
+      "source": "procedural/robot_spark/down-05",
+      "sha256": "a0d4e8b2ebae522c5e38b24d3c05782539503fc6a0da59feace3f93ce80e20b3"
     },
     {
       "file": "down-06.png",
-      "source": "procedural/down/down-06",
-      "sha256": "11ea40eb2923e0f89af0d58ed40b10d7fd8de8a9e585e1b98ce674cd449ab4f5"
+      "source": "procedural/robot_spark/down-06",
+      "sha256": "a0d4e8b2ebae522c5e38b24d3c05782539503fc6a0da59feace3f93ce80e20b3"
     },
     {
       "file": "down-07.png",
-      "source": "procedural/down/down-07",
-      "sha256": "c8590e23e5ee83f9c976d7e2b9bfc114269294801b56bb7b3168833734318ac3"
+      "source": "procedural/robot_spark/down-07",
+      "sha256": "f5feedf8950f93d4ad98c515102bdea25a1944b8825b91dccd8d95d005696a94"
     },
     {
       "file": "down-08.png",
-      "source": "procedural/down/down-08",
-      "sha256": "5a5bc6a1bbcd1cfea852aa4820194b0cec12722b051630a9894d054fe8076c7f"
+      "source": "procedural/robot_spark/down-08",
+      "sha256": "f637a171f6dcc64c7f58e985f018fb9a34be851884194a3a4b638199897f667b"
     },
     {
       "file": "down-09.png",
-      "source": "procedural/down/down-09",
-      "sha256": "0a5196e1aa241338ba295b2d0e0baf3092ffebaa92aed83268217c6a892ea108"
+      "source": "procedural/robot_spark/down-09",
+      "sha256": "c92dba34932fb3ae5195d6a2421736acd95fcafadf30f15a39a6f392d7cc538a"
     },
     {
       "file": "down-10.png",
-      "source": "procedural/down/down-10",
-      "sha256": "fbeec0ce84b7e01b691e67876f02186f34e25cd1669a2054dfcb410d50bf853e"
+      "source": "procedural/robot_spark/down-10",
+      "sha256": "9b82041411a45c867395b8952366d3de8ad885a3eabcf564e7af0d5756f115aa"
     },
     {
       "file": "down-11.png",
-      "source": "procedural/down/down-11",
-      "sha256": "771b18c51d7d32db1a51157b09a935b2f7304e47bc48a6fbb71d5e6c83d83888"
+      "source": "procedural/robot_spark/down-11",
+      "sha256": "10c65b6de17666aba2c55793f23872ec2264a2aa2544c627c25bf109b0d8453f"
     },
     {
       "file": "surprise-00.png",
-      "source": "procedural/surprise/surprise-00",
-      "sha256": "418b2e2a2f2bb9ebfd0d998ea019f5346e12d345969721b7148c66468ac20a69"
+      "source": "procedural/robot_spark/surprise-00",
+      "sha256": "59d7abff3a3ea3358e46c279372018402ae41b38ef609ff9e244c6f1c1f44c7a"
     },
     {
       "file": "surprise-01.png",
-      "source": "procedural/surprise/surprise-01",
-      "sha256": "8805c4174183860b14a7297601d7656c1faf5a7684cdf26e1d3466edccfa4e32"
+      "source": "procedural/robot_spark/surprise-01",
+      "sha256": "a91943b8332d69c4a56e40e9d2512ea41feb7a06a5519af275268bb4ff29a21d"
     },
     {
       "file": "surprise-02.png",
-      "source": "procedural/surprise/surprise-02",
-      "sha256": "5b0e81dbaae8c663a26371adc25aad1ee84e70c9839d831a28f214e08f03108e"
+      "source": "procedural/robot_spark/surprise-02",
+      "sha256": "dded2e474fa37e631943754695ffb150d33569a8f646fca0b02f058e8d042c39"
     },
     {
       "file": "surprise-03.png",
-      "source": "procedural/surprise/surprise-03",
-      "sha256": "9b06746b7f027db876cbe42688714a2f410cd05350aabf955aac15662b734e81"
+      "source": "procedural/robot_spark/surprise-03",
+      "sha256": "9de01a50d394a292c08e5e49c7a4819f570f1e1b0e4db7a410508bd288333ccc"
     },
     {
       "file": "surprise-04.png",
-      "source": "procedural/surprise/surprise-04",
-      "sha256": "43f90455b173419808ed09fda1344ba73c7bf33eb19862ce3184baa2a5c17c27"
+      "source": "procedural/robot_spark/surprise-04",
+      "sha256": "9d4bce576435d7092abc5c48c903ea439f325b8d4d2abcb09910e80787b3ee38"
     },
     {
       "file": "surprise-05.png",
-      "source": "procedural/surprise/surprise-05",
-      "sha256": "129c7ae467a55060a4d930a2f1a4c11381d64012a79ac49a558b5d776cd024b5"
+      "source": "procedural/robot_spark/surprise-05",
+      "sha256": "ac9e1219cba20a351d0cd4564849872e8d0dda17642e9dbad1624f37e437e228"
     },
     {
       "file": "surprise-06.png",
-      "source": "procedural/surprise/surprise-06",
-      "sha256": "129c7ae467a55060a4d930a2f1a4c11381d64012a79ac49a558b5d776cd024b5"
+      "source": "procedural/robot_spark/surprise-06",
+      "sha256": "ac9e1219cba20a351d0cd4564849872e8d0dda17642e9dbad1624f37e437e228"
     },
     {
       "file": "surprise-07.png",
-      "source": "procedural/surprise/surprise-07",
-      "sha256": "43f90455b173419808ed09fda1344ba73c7bf33eb19862ce3184baa2a5c17c27"
+      "source": "procedural/robot_spark/surprise-07",
+      "sha256": "9d4bce576435d7092abc5c48c903ea439f325b8d4d2abcb09910e80787b3ee38"
     },
     {
       "file": "surprise-08.png",
-      "source": "procedural/surprise/surprise-08",
-      "sha256": "9b06746b7f027db876cbe42688714a2f410cd05350aabf955aac15662b734e81"
+      "source": "procedural/robot_spark/surprise-08",
+      "sha256": "9de01a50d394a292c08e5e49c7a4819f570f1e1b0e4db7a410508bd288333ccc"
     },
     {
       "file": "surprise-09.png",
-      "source": "procedural/surprise/surprise-09",
-      "sha256": "5b0e81dbaae8c663a26371adc25aad1ee84e70c9839d831a28f214e08f03108e"
+      "source": "procedural/robot_spark/surprise-09",
+      "sha256": "dded2e474fa37e631943754695ffb150d33569a8f646fca0b02f058e8d042c39"
     },
     {
       "file": "surprise-10.png",
-      "source": "procedural/surprise/surprise-10",
-      "sha256": "8805c4174183860b14a7297601d7656c1faf5a7684cdf26e1d3466edccfa4e32"
+      "source": "procedural/robot_spark/surprise-10",
+      "sha256": "a91943b8332d69c4a56e40e9d2512ea41feb7a06a5519af275268bb4ff29a21d"
     },
     {
       "file": "surprise-11.png",
-      "source": "procedural/surprise/surprise-11",
-      "sha256": "418b2e2a2f2bb9ebfd0d998ea019f5346e12d345969721b7148c66468ac20a69"
+      "source": "procedural/robot_spark/surprise-11",
+      "sha256": "59d7abff3a3ea3358e46c279372018402ae41b38ef609ff9e244c6f1c1f44c7a"
     },
     {
       "file": "working-00.png",
-      "source": "procedural/working/working-00",
-      "sha256": "e5911255c3a10af7d83f63c739c7fbb439fb98e2e5faf1ae7b2119fd6b6fe5ff"
+      "source": "procedural/robot_spark/working-00",
+      "sha256": "2651860ef6ff2056a8de07fb0fe1a19aa6758dc6325c1595a0eedf2796639c96"
     },
     {
       "file": "working-01.png",
-      "source": "procedural/working/working-01",
-      "sha256": "437b4d1b2590de747f13e6e96cdc9f5dbfd3da1768725952b72270dbbcaa38dd"
+      "source": "procedural/robot_spark/working-01",
+      "sha256": "bf3ad3c7174c0099539bbf26e25c262ed60a70692d800ffd4452c2da567e19fd"
     },
     {
       "file": "working-02.png",
-      "source": "procedural/working/working-02",
-      "sha256": "1823bf43fd7285fdcd6ceb14ccd41649fea6a850e08e2813118921a63d5f841b"
+      "source": "procedural/robot_spark/working-02",
+      "sha256": "a586c1ce4d4dfe12ed81ac638f53fef19e9cb3f88083b60a711d85969e7e1f91"
     },
     {
       "file": "working-03.png",
-      "source": "procedural/working/working-03",
-      "sha256": "5ff246ea27ccfc777d17c79bb4af40fb113a86cadc393b5055cb07b34d3c97c7"
+      "source": "procedural/robot_spark/working-03",
+      "sha256": "5586e5a4fcb8dbee083adcdd90ebcca57f3eda9da2a76ef896e7e73711b23237"
     },
     {
       "file": "working-04.png",
-      "source": "procedural/working/working-04",
-      "sha256": "76d9d3a0dead384b123c14c7ad9025e37608ff7beca6c23ae136bab8053e8f0f"
+      "source": "procedural/robot_spark/working-04",
+      "sha256": "a694d7303dc32b18164bbd8aa1f1861cac3aece187c5f1cf19ca38a52eaeea52"
     },
     {
       "file": "working-05.png",
-      "source": "procedural/working/working-05",
-      "sha256": "8adffb2c2c8c9dc778a8ebc9f02e7ed73634a7cf2483964389b9c35995ba4ec5"
+      "source": "procedural/robot_spark/working-05",
+      "sha256": "4b7e40a6a65a0aa329575d84d282154e38f65cd0ca40da65edc60491de51015f"
     },
     {
       "file": "working-06.png",
-      "source": "procedural/working/working-06",
-      "sha256": "5b6ca4e01a874ffda24c8bf1dd5171cad48e3f1d9c5c05251886ad0d415175d2"
+      "source": "procedural/robot_spark/working-06",
+      "sha256": "ac5ceacc4045f569ea2ffb44ed91a6fe9a97bf9d87a8f1fc18921646fd2f95dc"
     },
     {
       "file": "working-07.png",
-      "source": "procedural/working/working-07",
-      "sha256": "21a8afe3e6e05d7664a5afb54e1443183f83f01bd92dc85d8de416a0f4a3d376"
+      "source": "procedural/robot_spark/working-07",
+      "sha256": "001018440efab1083e7448223db0d562b275aae96cd8898d2b00850ab4c72d07"
     },
     {
       "file": "working-08.png",
-      "source": "procedural/working/working-08",
-      "sha256": "190980d29c629da6273b8b549174999c6e89ef5f3bc073c8b16fad52a0476665"
+      "source": "procedural/robot_spark/working-08",
+      "sha256": "c1712ad9e6d3b9a01640ea42e8a84b28352cce5993df8a1dffb4854c6ed14b7d"
     },
     {
       "file": "working-09.png",
-      "source": "procedural/working/working-09",
-      "sha256": "212bd340bac574870de6db89ae2ee2b63118478a1346c2e1cc1ca4bd03e3da02"
+      "source": "procedural/robot_spark/working-09",
+      "sha256": "f295490a86e86122ac8dd37d6af9bb931a090972c1930c42a8c37e60bb782115"
     },
     {
       "file": "working-10.png",
-      "source": "procedural/working/working-10",
-      "sha256": "6b8758be504ce65d9dd3f5d7e8e6952f1c6f14a6821b246812ebd5ccdf6952cc"
+      "source": "procedural/robot_spark/working-10",
+      "sha256": "fbb477c16e659d85af8fd502c8af6d2bd4dcf014aecca151559b9a89dde3239a"
     },
     {
       "file": "working-11.png",
-      "source": "procedural/working/working-11",
-      "sha256": "ef95d7b3b19338139819236346aa29ae0bf0df8850d4cc80915dafb158656a0d"
+      "source": "procedural/robot_spark/working-11",
+      "sha256": "a77757e61bb079e5b1f5cded8b1bf65ee652a6f3c35e7a86b5bc0215bd109177"
     },
     {
       "file": "attention-00.png",
-      "source": "procedural/attention/attention-00",
-      "sha256": "7ff38fbf6c23c5dabb6bd6b0ce2d814a2da5bd75e2d6ed358726ba9f2d228dfe"
+      "source": "procedural/robot_spark/attention-00",
+      "sha256": "fa113d8d6366dd72cebed4ead3301ae08182a226e26862ba8dc5339b8ccbd3a0"
     },
     {
       "file": "attention-01.png",
-      "source": "procedural/attention/attention-01",
-      "sha256": "f6c8d3e1a83e30f37717403ecadba6ff3dab555ab944f1128c2cff510d9e5aef"
+      "source": "procedural/robot_spark/attention-01",
+      "sha256": "3f37175c9d7498ba0c1bf44f2d075416496d167df69e85d9381a1cecc2402ba6"
     },
     {
       "file": "attention-02.png",
-      "source": "procedural/attention/attention-02",
-      "sha256": "20edaf71862d7c1d2b689918ef5c1dee63ecc9b1d74d7c297ee4d978d4bd07b1"
+      "source": "procedural/robot_spark/attention-02",
+      "sha256": "32c59298a7b7ec259e8559f08aa6f662dde9f960cf387ecfca05dbb1c3585ed6"
     },
     {
       "file": "attention-03.png",
-      "source": "procedural/attention/attention-03",
-      "sha256": "0b7f2329667e846ed364c1b00287be5cd6a959f82393683feca883a2cbd5f86a"
+      "source": "procedural/robot_spark/attention-03",
+      "sha256": "b3f54706b5ca8786f65b9d65c0a0343a8cddd0657a761402a571ed563a4070bf"
     },
     {
       "file": "attention-04.png",
-      "source": "procedural/attention/attention-04",
-      "sha256": "0dd1786baa63e887efc7f2d3467ec94fe0183c8ae71c94b10f80af21b247b1a0"
+      "source": "procedural/robot_spark/attention-04",
+      "sha256": "af5728b2edfe6838308b98cc989e13d574823ff4efb81877202b3a37c2aba0e8"
     },
     {
       "file": "attention-05.png",
-      "source": "procedural/attention/attention-05",
-      "sha256": "6a69ffd8107a7563abead34853b737188d62e0f0f62de9b49f93360ef9cb8fe4"
+      "source": "procedural/robot_spark/attention-05",
+      "sha256": "c492404533f633c3aa6d276af2051e34d37a84a1942f6418eea3dc97776885a9"
     },
     {
       "file": "attention-06.png",
-      "source": "procedural/attention/attention-06",
-      "sha256": "f9b481c0f6dfcf7e921f110ce734bc1cc698592f089d2bc920cb099643e3d826"
+      "source": "procedural/robot_spark/attention-06",
+      "sha256": "8618b85516bc5dc2689f353dfc719538505b96b277e2829479ba7a94323327dd"
     },
     {
       "file": "attention-07.png",
-      "source": "procedural/attention/attention-07",
-      "sha256": "661c9e8bd9be9c55bb30a201db48de44189901390554756134df12965e4fea53"
+      "source": "procedural/robot_spark/attention-07",
+      "sha256": "4b84bef4f06810f003932142a78068a6f041190d4651c0de07671b9ce32e943b"
     },
     {
       "file": "attention-08.png",
-      "source": "procedural/attention/attention-08",
-      "sha256": "4c96426b81bf6d2465d98a9276fab5981b0cadf62140614886c53699b6404999"
+      "source": "procedural/robot_spark/attention-08",
+      "sha256": "8f38a2ea412cb55c3dc9bb88b71c520bb0703eab11da21087ba1290487b70410"
     },
     {
       "file": "attention-09.png",
-      "source": "procedural/attention/attention-09",
-      "sha256": "db494995c2255851c31abe2dbe3537a7f2357a3f95c1b75d4b09fdb46650bfdb"
+      "source": "procedural/robot_spark/attention-09",
+      "sha256": "a8c6e11fa5134322fbe22d2aeca78286e13bdd1d8fe527f2585ad801e9f95b22"
     },
     {
       "file": "attention-10.png",
-      "source": "procedural/attention/attention-10",
-      "sha256": "b801652344aea55414f7e14d1529751d3b400c62f191b7c30a5ccdc26ecb372d"
+      "source": "procedural/robot_spark/attention-10",
+      "sha256": "123e4aeecad2bbdddfc8d442b22d7662d6b6bcef89356b5cf4ea6ed5ca6288c2"
     },
     {
       "file": "attention-11.png",
-      "source": "procedural/attention/attention-11",
-      "sha256": "d00eb7f766e728556f471f2cd30aa18469246a609be87996dbb15005bafc4241"
+      "source": "procedural/robot_spark/attention-11",
+      "sha256": "437abf99e78addbb1b9fb11d8c8909d8ceb5e3322c9c02a277e4b40f0ab1fee5"
     },
     {
       "file": "complete-00.png",
-      "source": "procedural/complete/complete-00",
-      "sha256": "7e988c29da4213725e89a5831c247a2f8c222ee7c43537bf95ee70bf776af1b8"
+      "source": "procedural/robot_spark/complete-00",
+      "sha256": "0b58d8f850d157e12d62040203227998d55953e234eef8cfc8fa4a72f289ec1c"
     },
     {
       "file": "complete-01.png",
-      "source": "procedural/complete/complete-01",
-      "sha256": "9fbf512e1442a571e1e81fd46b8f3813bbd3e47c429dfdd5ec81fcae0b0bb1c4"
+      "source": "procedural/robot_spark/complete-01",
+      "sha256": "b19d63a56aacfcba62a304ea0bb1d89950fb82b0c5a363f6cdeeb47c363c23c9"
     },
     {
       "file": "complete-02.png",
-      "source": "procedural/complete/complete-02",
-      "sha256": "5508f4bd9f0d9ee6f1b65acaea8710e46676c92e07b4db9e81cca1c5dd6dd5ac"
+      "source": "procedural/robot_spark/complete-02",
+      "sha256": "4e4b010ebfd7a9e421595312d575903fb2c1aea5729f38608e27cf288f535157"
     },
     {
       "file": "complete-03.png",
-      "source": "procedural/complete/complete-03",
-      "sha256": "d5c241573db238ee58869fa01a39c7c76ea885f7e2e41d3f5df57d48a936614f"
+      "source": "procedural/robot_spark/complete-03",
+      "sha256": "1472230dc117cfc27624ca94c64016aa67193c934f854402909f50cf08b95028"
     },
     {
       "file": "complete-04.png",
-      "source": "procedural/complete/complete-04",
-      "sha256": "3d6e304b8a4895f8d65db0603bb35ebb5732655da48756550234ea692a8e05c6"
+      "source": "procedural/robot_spark/complete-04",
+      "sha256": "193a2174cf6b7e008bf7b3c9560e64b19753cc6597337a4840b20771f6a7f7a1"
     },
     {
       "file": "complete-05.png",
-      "source": "procedural/complete/complete-05",
-      "sha256": "aaa74931d60944c52aa778ea830f3b66df7fc2017f7d51670cd39d700a66696f"
+      "source": "procedural/robot_spark/complete-05",
+      "sha256": "71bd6392451c1c0137335c2def6dd745a50694b40198e2c1c85e4ce3194212ae"
     },
     {
       "file": "complete-06.png",
-      "source": "procedural/complete/complete-06",
-      "sha256": "aaa74931d60944c52aa778ea830f3b66df7fc2017f7d51670cd39d700a66696f"
+      "source": "procedural/robot_spark/complete-06",
+      "sha256": "71bd6392451c1c0137335c2def6dd745a50694b40198e2c1c85e4ce3194212ae"
     },
     {
       "file": "complete-07.png",
-      "source": "procedural/complete/complete-07",
-      "sha256": "3d6e304b8a4895f8d65db0603bb35ebb5732655da48756550234ea692a8e05c6"
+      "source": "procedural/robot_spark/complete-07",
+      "sha256": "193a2174cf6b7e008bf7b3c9560e64b19753cc6597337a4840b20771f6a7f7a1"
     },
     {
       "file": "complete-08.png",
-      "source": "procedural/complete/complete-08",
-      "sha256": "d5c241573db238ee58869fa01a39c7c76ea885f7e2e41d3f5df57d48a936614f"
+      "source": "procedural/robot_spark/complete-08",
+      "sha256": "1472230dc117cfc27624ca94c64016aa67193c934f854402909f50cf08b95028"
     },
     {
       "file": "complete-09.png",
-      "source": "procedural/complete/complete-09",
-      "sha256": "5508f4bd9f0d9ee6f1b65acaea8710e46676c92e07b4db9e81cca1c5dd6dd5ac"
+      "source": "procedural/robot_spark/complete-09",
+      "sha256": "4e4b010ebfd7a9e421595312d575903fb2c1aea5729f38608e27cf288f535157"
     },
     {
       "file": "complete-10.png",
-      "source": "procedural/complete/complete-10",
-      "sha256": "9fbf512e1442a571e1e81fd46b8f3813bbd3e47c429dfdd5ec81fcae0b0bb1c4"
+      "source": "procedural/robot_spark/complete-10",
+      "sha256": "b19d63a56aacfcba62a304ea0bb1d89950fb82b0c5a363f6cdeeb47c363c23c9"
     },
     {
       "file": "complete-11.png",
-      "source": "procedural/complete/complete-11",
-      "sha256": "7e988c29da4213725e89a5831c247a2f8c222ee7c43537bf95ee70bf776af1b8"
+      "source": "procedural/robot_spark/complete-11",
+      "sha256": "0b58d8f850d157e12d62040203227998d55953e234eef8cfc8fa4a72f289ec1c"
     }
   ]
 }
