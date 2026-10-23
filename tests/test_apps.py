@@ -121,6 +121,7 @@ class TestBadgeApps(unittest.TestCase):
                 )
                 self.assertNotIn("Crash in", res.stdout)
                 self.assertNotIn("Crash in", res.stderr)
+                self.assertNotIn("Error in update()", res.stdout)
 
 
 if __name__ == "__main__":
