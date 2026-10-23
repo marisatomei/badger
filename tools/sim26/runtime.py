@@ -210,8 +210,15 @@ class BadgeRuntime:
         # Return mock accelerometer & gyro vectors
         return (0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
 
-    def caselights(self, *args) -> None:
-        pass
+    def caselights(self, *args) -> tuple[float, float, float, float]:
+        if not hasattr(self, "_caselights"):
+            self._caselights = (0.0, 0.0, 0.0, 0.0)
+        if len(args) == 1 and isinstance(args[0], (int, float)):
+            v = float(args[0])
+            self._caselights = (v, v, v, v)
+        elif len(args) >= 4:
+            self._caselights = (float(args[0]), float(args[1]), float(args[2]), float(args[3]))
+        return self._caselights
 
     def poll(self) -> None:
         pass

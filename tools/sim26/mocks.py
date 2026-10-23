@@ -461,6 +461,9 @@ def install_mock_modules() -> None:
     builtins.micropython = m_mp  # type: ignore
 
     # wifi & ntptime & utime
+    _orig_time = getattr(time, "_orig_time", time.time)
+    time._orig_time = _orig_time  # type: ignore
+    time.time = lambda: int(_orig_time())  # type: ignore
     if not hasattr(time, "ticks_ms"):
         time.ticks_ms = lambda: int(time.monotonic() * 1000) & 0x3FFFFFFF  # type: ignore
         time.ticks_diff = lambda a, b: ((a - b + 0x20000000) & 0x3FFFFFFF) - 0x20000000  # type: ignore
