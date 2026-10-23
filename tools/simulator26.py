@@ -555,8 +555,23 @@ class _ShapeNamespace:
         return ShapeObj("circle", cx=cx, cy=cy, r=radius)
 
     @staticmethod
-    def line(x1: float, y1: float, x2: float, y2: float, width: float = 1.0) -> ShapeObj:
-        return ShapeObj("line", x1=float(x1), y1=float(y1), x2=float(x2), y2=float(y2), width=float(width))
+    def line(*args, **kwargs) -> ShapeObj:
+        width = float(kwargs.get("width", 1.0))
+        if len(args) == 2 or (len(args) == 3 and not isinstance(args[2], (int, float))):
+            p1, p2 = args[0], args[1]
+            return ShapeObj("line", x1=float(p1[0]), y1=float(p1[1]), x2=float(p2[0]), y2=float(p2[1]), width=width)
+        elif len(args) >= 4:
+            x1, y1, x2, y2 = args[0], args[1], args[2], args[3]
+            w = float(args[4]) if len(args) >= 5 else width
+            return ShapeObj("line", x1=float(x1), y1=float(y1), x2=float(x2), y2=float(y2), width=w)
+        elif len(args) == 3 and isinstance(args[2], (int, float)):
+            p1, p2, w = args[0], args[1], float(args[2])
+            return ShapeObj("line", x1=float(p1[0]), y1=float(p1[1]), x2=float(p2[0]), y2=float(p2[1]), width=w)
+        return ShapeObj("line", x1=0.0, y1=0.0, x2=0.0, y2=0.0, width=width)
+
+    @staticmethod
+    def arc(cx: float, cy: float, r1: float, r2: float, a1: float = 0, a2: float = 360) -> ShapeObj:
+        return ShapeObj("circle", cx=float(cx), cy=float(cy), r=float(r2))
 
     @staticmethod
     def pie(cx: float, cy: float, r: float, a1: float = 0, a2: float = 360) -> ShapeObj:
@@ -776,6 +791,11 @@ class Screen:
             (int(round(x1)), int(round(y1))),
             (int(round(x2)), int(round(y2))),
         )
+
+    def shapes(self, shape_list: Any) -> None:
+        if shape_list:
+            for sh in shape_list:
+                self.shape(sh)
 
     def shape(self, sh: ShapeObj) -> None:
         if isinstance(self.pen, ImageBrush) and getattr(self.pen, "src", None):
@@ -1100,6 +1120,11 @@ class BadgeRuntime:
     def poll(self) -> None:
         pass
 
+    def update(self) -> None:
+        global _active_sim_app
+        if _active_sim_app is not None:
+            _active_sim_app._tick_frame()
+
 
 # -----------------------------------------------------------------------------
 # Persistent State
@@ -1137,7 +1162,9 @@ class DisplayMock:
         pass
 
     def update(self) -> None:
-        pass
+        global _active_sim_app
+        if _active_sim_app is not None:
+            _active_sim_app._tick_frame()
 
     def backlight(self, level: float = 1.0) -> None:
         pass
@@ -1437,24 +1464,141 @@ def install_mock_modules() -> None:
     m_wifi.connect = lambda *args, **kwargs: True
     m_wifi.disconnect = lambda: True
     m_wifi.failure = lambda: False
+    m_wifi.status = lambda: (3, "connected")
     sys.modules["wifi"] = m_wifi
+
+    m_net = ModuleType("network")
+    m_net.STA_IF = 0
+    m_net.AP_IF = 1
+
+    class MockWLAN:
+        def __init__(self, interface=0):
+            self.interface = interface
+            self._active = True
+            self._connected = True
+
+        def active(self, is_active=None):
+            if is_active is not None:
+                self._active = bool(is_active)
+            return self._active
+
+        def connect(self, ssid=None, password=None):
+            self._connected = True
+
+        def disconnect(self):
+            self._connected = False
+
+        def isconnected(self):
+            return self._connected
+
+        def status(self):
+            return 3
+
+        def ifconfig(self, config=None):
+            return ("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8")
+
+    m_net.WLAN = lambda interface=0: MockWLAN(interface)
+    sys.modules["network"] = m_net
 
     m_ntp = ModuleType("ntptime")
     m_ntp.settime = lambda: None
     sys.modules["ntptime"] = m_ntp
 
-    # requests
+    # requests with live HTTP fetching and graceful offline mock fallback
     m_req = ModuleType("requests")
-    class DummyResponse:
-        def __init__(self):
-            self.status_code = 200
-            self.text = "{}"
-        def json(self):
+
+    class SimulatorResponse:
+        def __init__(self, status_code: int, content: bytes, text: str, data: Any = None):
+            self.status_code = status_code
+            self.content = content
+            self.text = text
+            self._data = data
+            self.ok = 200 <= status_code < 400
+
+        def json(self) -> Any:
+            if self._data is not None:
+                return self._data
+            if self.text:
+                try:
+                    return json.loads(self.text)
+                except Exception:
+                    pass
             return {}
-        def close(self):
+
+        def close(self) -> None:
             pass
-    m_req.get = lambda *args, **kwargs: DummyResponse()
-    m_req.post = lambda *args, **kwargs: DummyResponse()
+
+    def _sim_request(url: str, *args, **kwargs) -> SimulatorResponse:
+        headers = kwargs.get("headers") or {"User-Agent": "GitHub Universe Badge 2026"}
+        timeout = kwargs.get("timeout") or 5.0
+        try:
+            import urllib.request
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                content = resp.read()
+                text = content.decode("utf-8", errors="replace")
+                return SimulatorResponse(resp.status, content, text)
+        except Exception:
+            pass
+
+        # Offline / fallback responses for known endpoints
+        now = int(time.time())
+        if "wheretheiss.at" in url and "positions" in url:
+            stamps = [now]
+            if "timestamps=" in url:
+                stamps_str = url.split("timestamps=")[-1].split("&")[0]
+                stamps = [int(s) for s in stamps_str.split(",") if s.isdigit()]
+            points = []
+            for ts in stamps:
+                points.append({
+                    "name": "iss",
+                    "id": 25544,
+                    "latitude": 25.0 + 20.0 * math.sin(ts / 900.0),
+                    "longitude": ((ts % 5400) / 5400.0 * 360.0) - 180.0,
+                    "altitude": 420.0,
+                    "velocity": 27600.0,
+                    "visibility": "daylight",
+                    "footprint": 4500.0,
+                    "solar_lat": -10.0,
+                    "solar_lon": 10.0,
+                    "timestamp": ts,
+                })
+            raw = json.dumps(points)
+            return SimulatorResponse(200, raw.encode("utf-8"), raw, points)
+
+        if "wheretheiss.at" in url:
+            data = {
+                "name": "iss",
+                "id": 25544,
+                "latitude": 20.5,
+                "longitude": -15.2,
+                "altitude": 423.5,
+                "velocity": 27570.0,
+                "visibility": "daylight",
+                "footprint": 4520.0,
+                "solar_lat": -11.5,
+                "solar_lon": 9.5,
+                "timestamp": now,
+            }
+            raw = json.dumps(data)
+            return SimulatorResponse(200, raw.encode("utf-8"), raw, data)
+
+        if "api.github.com/users/" in url:
+            handle = getattr(m_sec, "GITHUB_USERNAME", "mgliot") or "mgliot"
+            name = getattr(m_sec, "CONTACT_NAME", "Marcelino Gonzalez") or "Marcelino Gonzalez"
+            data = {
+                "login": handle,
+                "name": name,
+                "followers": 18,
+                "public_repos": 12,
+            }
+            raw = json.dumps(data)
+            return SimulatorResponse(200, raw.encode("utf-8"), raw, data)
+
+        return SimulatorResponse(200, b"{}", "{}")
+
+    m_req.get = _sim_request
+    m_req.post = _sim_request
     sys.modules["requests"] = m_req
 
     # secrets
@@ -1560,6 +1704,10 @@ class SimulatorApp:
         self.clock = pygame.time.Clock()
         self.running = True
         self.next_app_to_launch: str | None = None
+        self._last_ticks = pygame.time.get_ticks()
+
+        global _active_sim_app
+        _active_sim_app = self
 
         # Expose globals into builtins
         self._inject_globals()
@@ -1612,54 +1760,90 @@ class SimulatorApp:
         pygame.image.save(self.screen_obj._surface, str(filename))
         print(f"[Screenshot] Saved native {self.screen_obj.width}x{self.screen_obj.height} to {filename}")
 
+    def _tick_frame(self) -> None:
+        if not self.running:
+            raise SystemExit(0)
+
+        # 1. Input processing
+        self.badge_obj._pressed_this_frame.clear()
+        self.badge_obj._released_this_frame.clear()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                raise SystemExit(0)
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F12:
+                    self.save_screenshot()
+                    continue
+                if event.key == pygame.K_r:
+                    self.badge_obj._upside_down = not self.badge_obj._upside_down
+                    print(f"[Orientation] Inverted: {self.badge_obj._upside_down}")
+                    continue
+                if event.key == pygame.K_h and getattr(self, "current_app", "") != "menu":
+                    print("[Simulator] Home pressed. Returning to menu...")
+                    self.next_app_to_launch = "/system/apps/menu"
+                    raise SystemExit(0)
+
+                action = KEY_MAP.get(event.key)
+                if action:
+                    self.badge_obj._pressed_this_frame.add(action)
+                    self.badge_obj._current_keys.add(action)
+                    self.badge_obj._touched_keys.add(action)
+
+            elif event.type == pygame.KEYUP:
+                action = KEY_MAP.get(event.key)
+                if action:
+                    self.badge_obj._released_this_frame.add(action)
+                    self.badge_obj._current_keys.discard(action)
+                    self.badge_obj._touched_keys.discard(action)
+
+        # 2. Timing
+        now = pygame.time.get_ticks()
+        self.badge_obj.ticks = now
+        self.badge_obj.ticks_delta = max(1, now - getattr(self, "_last_ticks", now))
+        self._last_ticks = now
+
+        # 3. Blit to window
+        cur_w, cur_h = self.screen_obj.width * self.scale, self.screen_obj.height * self.scale
+        if self.window_surf.get_size() != (cur_w, cur_h):
+            self._update_window_size()
+
+        scaled = pygame.transform.scale(self.screen_obj._surface, (cur_w, cur_h))
+        if self.badge_obj._upside_down:
+            scaled = pygame.transform.rotate(scaled, 180)
+
+        self.window_surf.blit(scaled, (0, 0))
+        pygame.display.flip()
+
+        # Target 60 FPS
+        self.clock.tick(60)
+
+        if self.perf and (now % 500 < 20):
+            fps = self.clock.get_fps()
+            print(f"[Perf] FPS: {fps:.1f} | Resolution: {self.screen_obj.width}x{self.screen_obj.height} | Frame: {self.badge_obj.ticks_delta}ms")
+
+        if self.max_frames is not None:
+            self.frame_count += 1
+            if self.frame_count >= self.max_frames:
+                self.running = False
+                if self.save_screenshot:
+                    self.save_screenshot.parent.mkdir(parents=True, exist_ok=True)
+                    pygame.image.save(self.screen_obj._surface, str(self.save_screenshot))
+                    print(f"[Screenshot] Saved frame to {self.save_screenshot}")
+                raise SystemExit(0)
+
     def run(self, update_fn: Callable[[], Any]) -> RunResult:
         """Main loop executed by apps."""
         result: Any = None
-        last_ticks = pygame.time.get_ticks()
 
         while self.running:
-            # 1. Input processing
-            self.badge_obj._pressed_this_frame.clear()
-            self.badge_obj._released_this_frame.clear()
+            try:
+                self._tick_frame()
+            except SystemExit:
+                break
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    return RunResult(None)
-
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_F12:
-                        self.save_screenshot()
-                        continue
-                    if event.key == pygame.K_r:
-                        self.badge_obj._upside_down = not self.badge_obj._upside_down
-                        print(f"[Orientation] Inverted: {self.badge_obj._upside_down}")
-                        continue
-                    if event.key == pygame.K_h and getattr(self, "current_app", "") != "menu":
-                        print("[Simulator] Home pressed. Returning to menu...")
-                        self.next_app_to_launch = "/system/apps/menu"
-                        return RunResult("/system/apps/menu")
-
-                    action = KEY_MAP.get(event.key)
-                    if action:
-                        self.badge_obj._pressed_this_frame.add(action)
-                        self.badge_obj._current_keys.add(action)
-                        self.badge_obj._touched_keys.add(action)
-
-                elif event.type == pygame.KEYUP:
-                    action = KEY_MAP.get(event.key)
-                    if action:
-                        self.badge_obj._released_this_frame.add(action)
-                        self.badge_obj._current_keys.discard(action)
-                        self.badge_obj._touched_keys.discard(action)
-
-            # 2. Timing
-            now = pygame.time.get_ticks()
-            self.badge_obj.ticks = now
-            self.badge_obj.ticks_delta = max(1, now - last_ticks)
-            last_ticks = now
-
-            # 3. Call app frame
             try:
                 ret = update_fn()
                 if ret is not None:
@@ -1671,31 +1855,6 @@ class SimulatorApp:
                 print(f"[Simulator] Error in update(): {e}")
                 traceback.print_exc()
                 break
-
-            # 4. Blit to window
-            cur_w, cur_h = self.screen_obj.width * self.scale, self.screen_obj.height * self.scale
-            if self.window_surf.get_size() != (cur_w, cur_h):
-                self._update_window_size()
-
-            scaled = pygame.transform.scale(self.screen_obj._surface, (cur_w, cur_h))
-            if self.badge_obj._upside_down:
-                scaled = pygame.transform.rotate(scaled, 180)
-
-            self.window_surf.blit(scaled, (0, 0))
-            pygame.display.flip()
-
-            # Target 60 FPS
-            self.clock.tick(60)
-
-            if self.perf and (now % 500 < 20):
-                fps = self.clock.get_fps()
-                print(f"[Perf] FPS: {fps:.1f} | Resolution: {self.screen_obj.width}x{self.screen_obj.height} | Frame: {self.badge_obj.ticks_delta}ms")
-
-            if self.max_frames is not None:
-                self.frame_count += 1
-                if self.frame_count >= self.max_frames:
-                    self.running = False
-                    break
 
         if self.save_screenshot:
             self.save_screenshot.parent.mkdir(parents=True, exist_ok=True)
@@ -1743,6 +1902,8 @@ class SimulatorApp:
             sys.modules["__main__"] = mod
             try:
                 spec.loader.exec_module(mod)
+            except SystemExit:
+                pass
             except Exception as e:
                 import traceback
                 print(f"[Simulator] Crash in {app_name}: {e}")
