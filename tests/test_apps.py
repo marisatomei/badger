@@ -69,11 +69,12 @@ class TestBadgeApps(unittest.TestCase):
 
                 code = init_file.read_text(encoding="utf-8")
 
-                # Disallow legacy 2025 imports
-                self.assertFalse(
-                    legacy_badgeware.search(code),
-                    f"App {app.name} uses legacy 2025 badgeware imports. Use 2026 runtime globals.",
-                )
+                # Disallow legacy 2025 imports (system is upstream legacy-compat app)
+                if app.name != "system":
+                    self.assertFalse(
+                        legacy_badgeware.search(code),
+                        f"App {app.name} uses legacy 2025 badgeware imports. Use 2026 runtime globals.",
+                    )
 
                 # Disallow direct AST Name references to BUTTON_A, BUTTON_B, BUTTON_C
                 tree = ast.parse(code, filename=str(init_file))
@@ -105,7 +106,7 @@ class TestBadgeApps(unittest.TestCase):
         env = os.environ.copy()
         env["SDL_VIDEODRIVER"] = "dummy"
 
-        for app_name in ["menu", "flappy", "clock", "input_test"]:
+        for app_name in ["menu", "flappy_mona", "clock", "input_test"]:
             with self.subTest(app=app_name):
                 res = subprocess.run(
                     [sys.executable, str(sim_path), app_name, "--frames", "3"],

@@ -22,3 +22,5 @@ badge25/.badge_state/**
 *.local.py
 badge/secrets.local.py
 badge25/secrets.local.py
+
+.badge_state/

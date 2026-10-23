@@ -73,18 +73,17 @@ The repository includes a standalone Pygame simulator (`tools/simulator26.py`) t
 make sim
 
 # Launch a specific app:
-make sim APP=flappy
-make sim APP=plucky_cluck
+make sim APP=flappy_mona
 make sim APP=clock
 
 # Customize window scale (default is 4x):
-make sim APP=flappy SCALE=5
+make sim APP=flappy_mona SCALE=5
 
 # Clear persistent state before running:
-python3 tools/badge.py sim flappy --clean
+python3 tools/badge.py sim flappy_mona --clean
 
 # View live performance/framerate statistics:
-python3 tools/badge.py sim flappy --perf
+python3 tools/badge.py sim flappy_mona --perf
 ```
 
 ### Controls & Keybindings
@@ -127,8 +126,8 @@ Connect the badge via USB-C. The badge presents a USB serial CDC device (`2e8a:1
 | **Open interactive REPL** | `make repl` | `python3 tools/badge.py repl` |
 | **List badge files** | `make ls` | `python3 tools/badge.py ls :/system/apps` |
 | **Soft-reset badge** | `make reset` | `python3 tools/badge.py reset` |
-| **Live mount workspace** | `make mount APP=flappy` | `python3 tools/badge.py deploy flappy --mount` |
-| **Deploy app to badge** | `make deploy APP=flappy` | `python3 tools/badge.py deploy flappy` |
+| **Live mount workspace** | `make mount APP=flappy_mona` | `python3 tools/badge.py deploy flappy_mona --mount` |
+| **Deploy app to badge** | `make deploy APP=flappy_mona` | `python3 tools/badge.py deploy flappy_mona` |
 
 ### Persistent Deployment Note
 

@@ -62,14 +62,14 @@ repl:
 
 deploy:
 	@if [ -z "$(APP)" ]; then \
-		echo "Error: Specify APP name. Example: make deploy APP=flappy"; \
+		echo "Error: Specify APP name. Example: make deploy APP=flappy_mona"; \
 		exit 1; \
 	fi
 	@$(PYTHON) tools/badge.py deploy $(APP) $(if $(PORT),--port $(PORT),)
 
 mount:
 	@if [ -z "$(APP)" ]; then \
-		echo "Error: Specify APP name. Example: make mount APP=flappy"; \
+		echo "Error: Specify APP name. Example: make mount APP=flappy_mona"; \
 		exit 1; \
 	fi
 	@$(PYTHON) tools/badge.py deploy $(APP) --mount $(if $(PORT),--port $(PORT),)

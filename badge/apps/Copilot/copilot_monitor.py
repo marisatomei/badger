@@ -10,7 +10,7 @@ import time
 
 STATES = ("idle", "surprise", "working", "attention", "complete")
 DISCOVER = b"ESP32_AGENT_COMPANION_DISCOVER_V1"
-WOULD_BLOCK = (errno.EAGAIN,)
+WOULD_BLOCK = (errno.EAGAIN, getattr(errno, 'EWOULDBLOCK', errno.EAGAIN))
 STALE_MS = 15000
 
 
@@ -88,16 +88,25 @@ class Protocol:
             self.invalidate()
 
     def save_pairing(self, token):
-        parent = self.pairing_path.rsplit("/", 1)[0]
-        try:
-            os.mkdir(parent)
-        except OSError as error:
-            if error.args[0] != errno.EEXIST:
-                raise
+        clean_path = self.pairing_path.replace("\\", "/")
+        if "/" in clean_path:
+            parent = clean_path.rsplit("/", 1)[0]
+            try:
+                os.mkdir(parent)
+            except OSError as error:
+                if error.args[0] != errno.EEXIST:
+                    raise
         temporary = self.pairing_path + ".tmp"
         with open(temporary, "w") as destination:
             json.dump({"deviceId": self.device_id, "token": token}, destination)
-        os.rename(temporary, self.pairing_path)
+        if hasattr(os, "replace"):
+            os.replace(temporary, self.pairing_path)
+        else:
+            try:
+                os.remove(self.pairing_path)
+            except OSError:
+                pass
+            os.rename(temporary, self.pairing_path)
 
     def status(self):
         return {"deviceId": self.device_id, "boot": self.boot, "protocol": 8,

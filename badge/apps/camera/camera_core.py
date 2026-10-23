@@ -10,7 +10,7 @@ import time
 MAX_THUMB = 32768
 MAX_PREVIEW = 65536
 PHOTO_LIMIT = 15
-WOULD_BLOCK = (errno.EAGAIN, errno.EINPROGRESS, errno.EALREADY)
+WOULD_BLOCK = (errno.EAGAIN, getattr(errno, 'EWOULDBLOCK', errno.EAGAIN), errno.EINPROGRESS, errno.EALREADY)
 
 
 class CameraError(Exception):

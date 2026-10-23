@@ -18,6 +18,17 @@ import sys
 import zlib
 from pathlib import Path
 
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BADGE_ROOT = REPO_ROOT / "badge"
 APPS_DIR = BADGE_ROOT / "apps"
@@ -132,8 +143,8 @@ def cmd_validate(args: argparse.Namespace) -> int:
                 py_compile.compile(str(init_file), doraise=True)
                 code_text = init_file.read_text(encoding="utf-8")
 
-                # Check for legacy 2025 imports
-                if legacy_badgeware_imports.search(code_text):
+                # Check for legacy 2025 imports (system is upstream legacy-compat app)
+                if legacy_badgeware_imports.search(code_text) and app.name != "system":
                     app_issues.append(
                         "Uses legacy Universe 2025 badgeware imports. Use 2026 globals instead."
                     )
@@ -407,8 +418,14 @@ def cmd_deploy(args: argparse.Namespace) -> int:
 def cmd_sim(args: argparse.Namespace) -> int:
     """Run Universe 2026 badge app in the local simulator."""
     sim_script = REPO_ROOT / "tools" / "simulator26.py"
-    venv_py = REPO_ROOT / ".venv" / "bin" / "python3"
-    py_exec = str(venv_py) if venv_py.exists() else sys.executable
+    candidates = [
+        REPO_ROOT / ".venv" / "bin" / "python3",
+        REPO_ROOT / ".venv" / "bin" / "python",
+        REPO_ROOT / ".venv" / "Scripts" / "python.exe",
+        REPO_ROOT / ".venv" / "Scripts" / "python3.exe",
+    ]
+    venv_py = next((c for c in candidates if c.exists()), None)
+    py_exec = str(venv_py) if venv_py else sys.executable
     cmd = [py_exec, str(sim_script)]
     if args.app:
         cmd.append(args.app)

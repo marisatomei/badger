@@ -17,7 +17,8 @@ import os
 import sys
 import time
 from pathlib import Path
-from types import ModuleType
+import types
+from types import ModuleType, SimpleNamespace
 from typing import Any, Callable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -29,8 +30,14 @@ try:
     import pygame
 except ImportError:
     # Auto-detect local virtual environment if active shell didn't activate it
-    _venv_py = REPO_ROOT / ".venv" / "bin" / "python3"
-    if _venv_py.exists() and Path(sys.executable).resolve() != _venv_py.resolve():
+    _candidates = [
+        REPO_ROOT / ".venv" / "bin" / "python3",
+        REPO_ROOT / ".venv" / "bin" / "python",
+        REPO_ROOT / ".venv" / "Scripts" / "python.exe",
+        REPO_ROOT / ".venv" / "Scripts" / "python3.exe",
+    ]
+    _venv_py = next((c for c in _candidates if c.exists()), None)
+    if _venv_py and Path(sys.executable).resolve() != _venv_py.resolve():
         os.execv(str(_venv_py), [str(_venv_py)] + sys.argv)
     raise SystemExit(
         "Pygame is required to run the Universe 2026 Badge Simulator.\n"
@@ -70,6 +77,17 @@ def _safe_listdir(path: Any = ".") -> list[str]:
     if isinstance(path, (list, tuple)):
         path = path[0] if path else "."
     return _real_listdir(map_system_path(path))
+
+
+def _safe_ilistdir(path: Any = "."):
+    resolved = Path(map_system_path(path))
+    if not resolved.exists():
+        return []
+    result = []
+    for entry in resolved.iterdir():
+        type_flag = 0x4000 if entry.is_dir() else 0x8000
+        result.append((entry.name, type_flag, 0))
+    return result
 
 
 def _safe_open(file: Any, *args, **kwargs):
@@ -155,8 +173,10 @@ def _safe_import(name: str, globals: Any = None, locals: Any = None, fromlist: A
         for entry in list(sys.path):
             mapped_entry = Path(map_system_path(entry))
             candidate = mapped_entry / f"{name}.py"
-            if candidate.exists():
-                spec = importlib.util.spec_from_file_location(name, str(candidate))
+            candidate_src = mapped_entry / "src" / f"{name}.py"
+            target_file = candidate if candidate.exists() else (candidate_src if candidate_src.exists() else None)
+            if target_file:
+                spec = importlib.util.spec_from_file_location(name, str(target_file))
                 if spec and spec.loader:
                     mod = importlib.util.module_from_spec(spec)
                     sys.modules[name] = mod
@@ -180,6 +200,7 @@ def _safe_import(name: str, globals: Any = None, locals: Any = None, fromlist: A
 
 os.chdir = _safe_chdir  # type: ignore
 os.listdir = _safe_listdir  # type: ignore
+os.ilistdir = _safe_ilistdir  # type: ignore
 builtins.open = _safe_open  # type: ignore
 builtins.__import__ = _safe_import  # type: ignore
 
@@ -422,9 +443,34 @@ class ShapeObj:
         self.kind = kind
         self.kwargs = kwargs
         self.transform: mat3 | None = None
+        self.stroke_width: float | None = None
+
+    def stroke(self, width: float = 1.0, *args, **kwargs):
+        self.stroke_width = float(width)
+        return self
 
 
 class _ShapeNamespace:
+    JOIN_MITER = 0
+    JOIN_ROUND = 1
+    JOIN_BEVEL = 2
+    CAP_BUTT = 0
+    CAP_ROUND = 1
+    CAP_SQUARE = 2
+    ALIGN_CENTER = 0
+    ALIGN_INNER = 1
+    ALIGN_OUTER = 2
+    PATH_OPEN = 4
+
+    @staticmethod
+    def regular_polygon(x: float, y: float, radius: float, sides: int = 4, rotation: float = 0.0) -> ShapeObj:
+        import math
+        pts = []
+        angle_step = 2.0 * math.pi / max(3, int(sides))
+        for i in range(int(sides)):
+            angle = i * angle_step + rotation
+            pts.append(vec2(float(x) + float(radius) * math.cos(angle), float(y) + float(radius) * math.sin(angle)))
+        return ShapeObj("custom", points=pts)
     @staticmethod
     def rectangle(x: float, y: float, w: float, h: float, radius: float = 0) -> ShapeObj:
         return ShapeObj("rectangle", x=float(x), y=float(y), w=float(w), h=float(h), radius=float(radius))
@@ -458,8 +504,8 @@ class _ShapeNamespace:
         return ShapeObj("circle", cx=0, cy=0, r=10)
 
     @staticmethod
-    def custom(points: list) -> ShapeObj:
-        return ShapeObj("custom", points=points)
+    def custom(*contours) -> ShapeObj:
+        return ShapeObj("custom", contours=contours)
 
 
 shape = _ShapeNamespace()
@@ -472,6 +518,19 @@ class Image:
     OFF = 0
     X2 = 1
     X4 = 2
+    BILINEAR = 1
+    NEAREST = 0
+    NON_ZERO = 1
+    EVEN_ODD = 0
+    CENTER = 1
+    LEFT = 2
+    RIGHT = 3
+    TOP = 4
+    BOTTOM = 5
+    RGB565 = 1
+    QR_LOW = 1
+    QR_MEDIUM = 2
+    QR_HIGH = 3
 
     def __init__(self, surface: pygame.Surface):
         self._surface = surface
@@ -647,6 +706,7 @@ class Screen:
         kw = sh.kwargs
         kind = sh.kind
 
+        sw = int(round(sh.stroke_width)) if sh.stroke_width is not None else 0
         if kind in ("rectangle", "rounded_rectangle"):
             x, y, w, h = kw["x"], kw["y"], kw["w"], kw["h"]
             if sh.transform:
@@ -656,13 +716,13 @@ class Screen:
             r = int(kw.get("radius", 0))
             rx, ry = int(round(min(x, x + w))), int(round(min(y, y + h)))
             rw, rh = max(1, int(round(abs(w)))), max(1, int(round(abs(h))))
-            pygame.draw.rect(self._surface, c, pygame.Rect(rx, ry, rw, rh), border_radius=r)
+            pygame.draw.rect(self._surface, c, pygame.Rect(rx, ry, rw, rh), width=sw, border_radius=r)
 
         elif kind == "circle":
             cx, cy, r = kw["cx"], kw["cy"], kw["r"]
             if sh.transform:
                 cx, cy = sh.transform.transform_point(cx, cy)
-            pygame.draw.circle(self._surface, c, (int(round(cx)), int(round(cy))), max(0, int(round(r))))
+            pygame.draw.circle(self._surface, c, (int(round(cx)), int(round(cy))), max(0, int(round(r))), width=sw)
 
         elif kind == "line":
             x1, y1, x2, y2 = kw["x1"], kw["y1"], kw["x2"], kw["y2"]
@@ -671,6 +731,20 @@ class Screen:
                 x1, y1 = sh.transform.transform_point(x1, y1)
                 x2, y2 = sh.transform.transform_point(x2, y2)
             pygame.draw.line(self._surface, c, (int(round(x1)), int(round(y1))), (int(round(x2)), int(round(y2))), width=lw)
+
+        elif kind == "custom":
+            contours = kw.get("contours") or ([kw["points"]] if "points" in kw else [])
+            for poly in contours:
+                pts = []
+                if len(poly) > 0:
+                    if isinstance(poly[0], (int, float)):
+                        pts = [(int(round(poly[i])), int(round(poly[i + 1]))) for i in range(0, len(poly) - 1, 2)]
+                    else:
+                        pts = [(int(round(p[0])), int(round(p[1]))) for p in poly]
+                if len(pts) >= 3:
+                    pygame.draw.polygon(self._surface, c, pts, width=sw)
+                elif len(pts) == 2:
+                    pygame.draw.line(self._surface, c, pts[0], pts[1], width=max(1, sw))
 
     def blit(self, src: Image, dest: Any, src_rect: Any = None) -> None:
         if not isinstance(src, Image):
@@ -877,10 +951,77 @@ class State:
 # Mock Hardware Modules
 # -----------------------------------------------------------------------------
 
+class DisplayMock:
+    def set_async(self, async_mode: bool = True) -> None:
+        pass
+
+    def update(self) -> None:
+        pass
+
+    def backlight(self, level: float = 1.0) -> None:
+        pass
+
+    def brightness(self, level: float = 1.0) -> None:
+        pass
+
+
 def install_mock_modules() -> None:
+    # display
+    m_display = ModuleType("display")
+    m_display.set_async = lambda *args, **kwargs: None
+    m_display.update = lambda *args, **kwargs: None
+    m_display.backlight = lambda *args, **kwargs: None
+    m_display.brightness = lambda *args, **kwargs: None
+    sys.modules["display"] = m_display
+
+    # easing
+    import math
+    m_easing = ModuleType("easing")
+    m_easing.easeOutCubic = lambda t: 1.0 - (1.0 - max(0.0, min(1.0, float(t)))) ** 3
+    m_easing.easeInOutCubic = lambda t: 4.0 * t ** 3 if t < 0.5 else 1.0 - ((-2.0 * t + 2.0) ** 3) / 2.0
+    c1 = 1.70158
+    c3 = c1 + 1.0
+    m_easing.easeOutBack = lambda t: 1.0 + c3 * ((t - 1.0) ** 3) + c1 * ((t - 1.0) ** 2)
+    m_easing.easeOutElastic = lambda t: 0.0 if t <= 0 else (1.0 if t >= 1 else 2.0 ** (-10.0 * t) * math.sin((t * 10.0 - 0.75) * (2.0 * math.pi) / 3.0) + 1.0)
+    sys.modules["easing"] = m_easing
+
     # badgeware
     m_badgeware = ModuleType("badgeware")
+    m_badgeware.__path__ = []
     m_badgeware.State = State
+    m_badgeware.display = m_display
+    m_badgeware.get_backlight = lambda: 1.0
+    m_badgeware.set_backlight = lambda level: None
+    m_badgeware.get_battery_level = lambda: 100
+    m_badgeware.is_charging = lambda: False
+    m_badgeware.fatal_error = lambda msg: print(f"Fatal error: {msg}")
+
+    # Legacy badgeware compatibility for apps like 'system'
+    class LegacyIO:
+        BUTTON_A = "A"
+        BUTTON_B = "B"
+        BUTTON_C = "C"
+        BUTTON_UP = "UP"
+        BUTTON_DOWN = "DOWN"
+        pressed = set()
+
+    m_badgeware.io = LegacyIO
+    m_badgeware.brushes = SimpleNamespace(color=lambda r, g, b, a=255: ColorObj(r, g, b, a))
+    m_badgeware.shapes = shape
+    m_badgeware.screen = Screen(160, 120)
+    m_badgeware.PixelFont = SimpleNamespace(load=lambda path: FontWrapper("pixel", 12))
+    m_badgeware.run = lambda update_fn: None
+
+    # badgeware.ir
+    m_badgeware_ir = ModuleType("badgeware.ir")
+    class IRMock:
+        def bind(self, descriptor):
+            return descriptor
+        def close(self):
+            pass
+    m_badgeware_ir.ir = IRMock()
+    m_badgeware.ir = m_badgeware_ir
+    sys.modules["badgeware.ir"] = m_badgeware_ir
     sys.modules["badgeware"] = m_badgeware
 
     # machine
@@ -916,6 +1057,12 @@ def install_mock_modules() -> None:
 
     m_machine.Pin = Pin
     m_machine.RTC = RTC
+    m_machine.PWRON_RESET = 1
+    m_machine.HARD_RESET = 2
+    m_machine.WDT_RESET = 3
+    m_machine.DEEPSLEEP_RESET = 4
+    m_machine.SOFT_RESET = 5
+    m_machine.reset_cause = lambda: 1
     sys.modules["machine"] = m_machine
 
     # brand
@@ -984,9 +1131,11 @@ def install_mock_modules() -> None:
     m_powman.get_wake_reason = lambda: m_powman.WAKE_POWER
     sys.modules["powman"] = m_powman
 
-    # aye_arr.nec
+    # aye_arr.nec & remotes
     m_ayearr = ModuleType("aye_arr")
+    m_ayearr.__path__ = []
     m_nec = ModuleType("aye_arr.nec")
+    m_nec.__path__ = []
 
     class NECReceiver:
         def __init__(self, *args, **kwargs):
@@ -996,9 +1145,36 @@ def install_mock_modules() -> None:
             return None
 
     m_nec.NECReceiver = NECReceiver
+
+    m_remotes = ModuleType("aye_arr.nec.remotes")
+    m_remotes.__path__ = []
+
+    m_desc = ModuleType("aye_arr.nec.remotes.descriptor")
+    class RemoteDescriptor:
+        NAME = "Unknown"
+        ADDRESS = 0x00
+        BUTTON_CODES = {}
+
+        def __init__(self):
+            self._buttons = {}
+            self.on_known = None
+            self.on_any = None
+
+        def bind(self, name, on_press, on_repeat=True, on_release=False):
+            pass
+
+        def bind_code(self, code, on_press, on_repeat=True, on_release=False):
+            pass
+
+    m_desc.RemoteDescriptor = RemoteDescriptor
+    m_remotes.descriptor = m_desc
+    m_nec.remotes = m_remotes
     m_ayearr.nec = m_nec
+
     sys.modules["aye_arr"] = m_ayearr
     sys.modules["aye_arr.nec"] = m_nec
+    sys.modules["aye_arr.nec.remotes"] = m_remotes
+    sys.modules["aye_arr.nec.remotes.descriptor"] = m_desc
 
 
 # -----------------------------------------------------------------------------
@@ -1066,6 +1242,8 @@ class SimulatorApp:
         builtins.LORES = LORES  # type: ignore
         builtins.VSYNC = VSYNC  # type: ignore
         builtins.ELLIPSES = ELLIPSES  # type: ignore
+
+        builtins.display = DisplayMock()  # type: ignore
 
         builtins.run = self.run  # type: ignore
         builtins.launch = self.launch  # type: ignore

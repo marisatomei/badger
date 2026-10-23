@@ -64,7 +64,7 @@ def draw_graph(x, y, r, value):
     # if the graph is big enough, put the text in the centre.
     if r > 30:
         screen.pen = BLUE3
-        text = f"{state["current"]}ml"
+        text = f"{state['current']}ml"
         tw = screen.measure_text(text)[0]
         tx = x - tw / 2
         ty = y - 6
