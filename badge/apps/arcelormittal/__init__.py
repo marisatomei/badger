@@ -206,9 +206,9 @@ def draw_am_swoosh(cx, cy, scale, ticks):
     # Travelling highlight spark along the arch
     spark_u = (t * 0.45) % 1.0
     spark_idx = min(steps, int(spark_u * steps))
-    sx, sy = pts_outer[spark_idx]
+    spark_pt = pts_outer[spark_idx]
     screen.pen = color.rgb(255, 210, 120, 200)
-    screen.circle(sx, sy + 2 * scale, max(1, int(2.2 * scale)))
+    screen.circle(vec2(spark_pt.x, spark_pt.y + 2 * scale), max(1, int(2.2 * scale)))
 
 
 class Download:

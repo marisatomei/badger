@@ -48,9 +48,9 @@ def draw_am_tile_icon(cx, cy, scale, selected, selected_at):
 
     if selected:
         spark_idx = min(steps, int(((t * 0.65) % 1.0) * steps))
-        sx, sy = pts_outer[spark_idx]
+        spark_pt = pts_outer[spark_idx]
         screen.pen = color.rgb(255, 220, 130, 220)
-        screen.circle(sx, sy + 1.5 * s, max(1, int(2.2 * s)))
+        screen.circle(vec2(spark_pt.x, spark_pt.y + 1.5 * s), max(1, int(2.2 * s)))
 
 TILES_PER_ROW = 4
 
