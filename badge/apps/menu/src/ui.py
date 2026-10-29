@@ -20,6 +20,9 @@ white = color.rgb(255, 255, 255)
 black = color.rgb(0, 0, 0)
 dim_white = color.rgb(255, 255, 255, 140)
 accent = color.rgb(95, 237, 131)
+bat_red = color.rgb(248, 81, 73)
+bat_yellow = color.rgb(235, 185, 55)
+bat_green = color.rgb(63, 185, 80)
 
 STATUS_HEIGHT = 21
 RIBBON_TOP = 198
@@ -76,17 +79,37 @@ def read_battery():
 
 def draw_battery(right, top):
     charging, level = read_battery()
+    actual_level = level
+    fill_level = (badge.ticks / 20) % 100 if charging else level
+
     if charging:
-        level = (badge.ticks / 20) % 100
+        bat_color = bat_green
+    elif actual_level < 15:
+        bat_color = bat_red
+    elif actual_level < 40:
+        bat_color = bat_yellow
+    else:
+        bat_color = bat_green
+
+    pct_text = f"{int(actual_level)}%"
+    screen.font = status_font
+    tw, _ = screen.measure_text(pct_text)
+
     width, height = 22, 11
     left = right - width - 2
+
+    screen.pen = bat_color
+    screen.text(pct_text, left - tw - 4, top - 2)
+
     screen.pen = white
     screen.rectangle(left, top, width, height)
     screen.rectangle(left + width, top + 4, 2, 3)
     screen.pen = black
     screen.rectangle(left + 1, top + 1, width - 2, height - 2)
-    screen.pen = white
-    screen.rectangle(left + 2, top + 2, round((width - 4) * level / 100), height - 4)
+    screen.pen = bat_color
+    fill_w = round((width - 4) * max(0, min(100, fill_level)) / 100)
+    if fill_w > 0:
+        screen.rectangle(left + 2, top + 2, fill_w, height - 4)
     return left
 
 

@@ -33,6 +33,9 @@ white = color.rgb(255, 255, 255)
 black = color.rgb(0, 0, 0)
 dim_white = color.rgb(255, 255, 255, 140)
 faint_white = color.rgb(255, 255, 255, 60)
+bat_red = color.rgb(248, 81, 73)
+bat_yellow = color.rgb(235, 185, 55)
+bat_green = color.rgb(63, 185, 80)
 
 status_font = font.salty
 caption_font = font.corset
@@ -112,19 +115,38 @@ def draw_lock(right, top, pen):
 
 
 def draw_battery(right, top):
-    if badge.is_charging():
-        level = (badge.ticks / 20) % 100
+    charging = badge.is_charging()
+    actual_level = badge.battery_level()
+    fill_level = (badge.ticks / 20) % 100 if charging else actual_level
+
+    if charging:
+        bat_color = bat_green
+    elif actual_level < 15:
+        bat_color = bat_red
+    elif actual_level < 40:
+        bat_color = bat_yellow
     else:
-        level = badge.battery_level()
+        bat_color = bat_green
+
+    pct_text = f"{int(actual_level)}%"
+    screen.font = status_font
+    tw, _ = screen.measure_text(pct_text)
+
     width, height = 22, 11
     left = right - width - 2
+
+    screen.pen = bat_color
+    screen.text(pct_text, left - tw - 4, top - 2)
+
     screen.pen = white
     screen.rectangle(left, top, width, height)
     screen.rectangle(left + width, top + 4, 2, 3)
     screen.pen = black
     screen.rectangle(left + 1, top + 1, width - 2, height - 2)
-    screen.pen = white
-    screen.rectangle(left + 2, top + 2, round((width - 4) * level / 100), height - 4)
+    screen.pen = bat_color
+    fill_w = round((width - 4) * max(0, min(100, fill_level)) / 100)
+    if fill_w > 0:
+        screen.rectangle(left + 2, top + 2, fill_w, height - 4)
 
 
 def draw_status():
