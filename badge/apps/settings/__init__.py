@@ -114,9 +114,21 @@ def draw_lock(right, top, pen):
     screen.rectangle(left + 2, top, LOCK_WIDTH - 4, 2)
 
 
+battery = {"read_at": None, "charging": False, "level": 0}
+BATTERY_MS = 1000
+
+
+def read_battery():
+    now = badge.ticks
+    if battery["read_at"] is None or now - battery["read_at"] >= BATTERY_MS:
+        battery["read_at"] = now
+        battery["charging"] = badge.is_charging()
+        battery["level"] = badge.battery_level()
+    return battery["charging"], battery["level"]
+
+
 def draw_battery(right, top):
-    charging = badge.is_charging()
-    actual_level = badge.battery_level()
+    charging, actual_level = read_battery()
     fill_level = (badge.ticks / 20) % 100 if charging else actual_level
 
     if charging:
